@@ -1167,6 +1167,48 @@
         }
 
         fetchCharacters(1, "", false);
+                async function fetchDailyBirthday() {
+            const bdayImg = document.getElementById("bdayImg");
+            const bdayDesc = document.getElementById("bdayDesc");
+            if (!bdayDesc) return;
+
+            const query = `
+                query {
+                    Page(page: 1, perPage: 1) {
+                        characters(isBirthday: true, sort: FAVOURITES_DESC) {
+                            name { full }
+                            image { large }
+                            media(type: ANIME, sort: POPULARITY_DESC, perPage: 1) {
+                                nodes {
+                                    title { english romaji }
+                                }
+                            }
+                        }
+                    }
+                }
+            `;
+
+            try {
+                const res = await fetch("https://graphql.anilist.co", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ query })
+                });
+                const data = await res.json();
+                const char = data?.data?.Page?.characters[0];
+                if (char) {
+                    const anime = char.media.nodes[0] ? (char.media.nodes[0].title.english || char.media.nodes[0].title.romaji) : "";
+                    if (bdayImg) {
+                        bdayImg.src = char.image.large;
+                        bdayImg.referrerPolicy = "no-referrer";
+                    }
+                    bdayDesc.innerHTML = `Celebrating <strong>${char.name.full}</strong> ${anime ? `(${anime})` : ''} today! Wish them on the community lounge.`;
+                }
+            } catch (e) {}
+        }
+
+        fetchDailyBirthday();
+        
         
         function renderGenreChips() {
             const container = document.getElementById("genreContainer");
