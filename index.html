@@ -753,13 +753,63 @@
         </div>
         
 
-    <div class="tab-view" id="tab-anime">
+        <div class="tab-view" id="tab-anime">
         <div class="view-title">
             <span>🎬</span> <span id="label-anime">Anime Vault</span>
         </div>
-        <div class="genre-chips-container" id="genreContainer"></div>
+        
+        <!-- एनीमे लाइव सर्च बार -->
+        <input type="text" id="animeSearchInput" class="chat-input" style="width:100%; margin-bottom:10px;" placeholder="Search any anime (Attack on Titan, Naruto, Solo Leveling...)" oninput="searchAnime(this.value)">
+
+        <!-- एडवांस फ़िल्टर बार (Rating, Year, Language, Format) -->
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:12px;">
+            <select id="filterSort" class="chat-input" style="padding:8px; font-size:0.82rem;" onchange="applyAnimeFilters()">
+                <option value="POPULARITY_DESC">🔥 Most Popular</option>
+                <option value="SCORE_DESC">⭐ Highest Rated</option>
+                <option value="TRENDING_DESC">📈 Trending Now</option>
+                <option value="START_DATE_DESC">✨ Recently Released</option>
+            </select>
+
+            <select id="filterYear" class="chat-input" style="padding:8px; font-size:0.82rem;" onchange="applyAnimeFilters()">
+                <option value="">📅 All Years</option>
+                <option value="2026">2026 Releases</option>
+                <option value="2025">2025</option>
+                <option value="2024">2024</option>
+                <option value="2023">2023</option>
+                <option value="2022">2022</option>
+                <option value="2020">2020</option>
+                <option value="2015">2015</option>
+                <option value="2010">2010</option>
+                <option value="2000">Classic (2000)</option>
+            </select>
+
+            <select id="filterLang" class="chat-input" style="padding:8px; font-size:0.82rem;" onchange="applyAnimeFilters()">
+                <option value="">🌐 Audio / Origin (All)</option>
+                <option value="JP">🇯🇵 Japanese Audio (Sub/Dub)</option>
+                <option value="CN">🇨🇳 Chinese (Donghua)</option>
+                <option value="KR">🇰🇷 Korean (Aeni)</option>
+            </select>
+
+            <select id="filterFormat" class="chat-input" style="padding:8px; font-size:0.82rem;" onchange="applyAnimeFilters()">
+                <option value="">📺 All Formats</option>
+                <option value="TV">TV Series</option>
+                <option value="MOVIE">Anime Movies</option>
+                <option value="OVA">OVA / Special</option>
+            </select>
+        </div>
+
+        <!-- शैलियों (Genres) की चिप्स -->
+        <div class="genre-chips-container" id="genreContainer" style="margin-bottom:12px;"></div>
+
+        <!-- एनीमे ग्रिड -->
         <div class="anime-grid" id="animeGrid"></div>
-    </div>
+
+        <!-- लोड मोर बटन -->
+        <button id="loadMoreAnimeBtn" onclick="loadMoreAnime()" style="width:100%; padding:11px; background:var(--bg-card); border:1px solid var(--border); color:var(--accent-cyan); border-radius:8px; font-weight:700; cursor:pointer; margin-top:14px;">
+            ⬇️ Load More Anime
+        </button>
+        </div>
+        
 
     <div class="tab-view" id="tab-updates">
         <div class="view-title">
@@ -1210,18 +1260,163 @@
         fetchDailyBirthday();
         
         
+                // सभी प्रमुख शैलियाँ (Comedy, Harem, Ecchi सहित)
+        const ACCURATE_GENRES = [
+            "All", "Action", "Adventure", "Comedy", "Drama", "Ecchi", 
+            "Fantasy", "Harem", "Horror", "Mahou Shoujo", "Mecha", 
+            "Music", "Mystery", "Psychological", "Romance", "Sci-Fi", 
+            "Slice of Life", "Sports", "Supernatural", "Thriller"
+        ];
+
+        let animeVaultPage = 1;
+        let selectedGenres = []; // एक साथ कई शैलियाँ चुनने के लिए
+        let animeSearchText = "";
+        let animeSearchTimer = null;
+
         function renderGenreChips() {
             const container = document.getElementById("genreContainer");
+            if (!container) return;
             container.innerHTML = "";
-            GENRES.forEach(g => {
+            ACCURATE_GENRES.forEach(g => {
                 const chip = document.createElement("button");
-                chip.className = `genre-chip ${g === activeGenre ? 'active' : ''}`;
+                const isActive = (g === "All" && selectedGenres.length === 0) || selectedGenres.includes(g);
+                chip.className = `genre-chip ${isActive ? 'active' : ''}`;
                 chip.innerText = g;
-                chip.onclick = () => {
-                    activeGenre = g;
-                    renderGenreChips();
-                    fetchAnimeByGenre(g);
-                };
+                chip.onclick = () => toggleGenre(g);
+                container.appendChild(chip);
+            });
+        }
+
+        // एक से ज़्यादा जेनर सेलेक्ट/अन-सेलेक्ट करने का लॉजिक
+        function toggleGenre(genre) {
+            if (genre === "All") {
+                selectedGenres = [];
+            } else {
+                const index = selectedGenres.indexOf(genre);
+                if (index > -1) {
+                    selectedGenres.splice(index, 1);
+                } else {
+                    selectedGenres.push(genre);
+                }
+            }
+            animeVaultPage = 1;
+            renderGenreChips();
+            fetchAnimeVault(false);
+        }
+
+        async function fetchAnimeVault(append = false) {
+            const grid = document.getElementById("animeGrid");
+            if (!grid) return;
+            if (!append) grid.innerHTML = "<div style='grid-column: 1/-1; color:var(--text-secondary); padding:20px; text-align:center;'>Fetching curated anime...</div>";
+
+            const sortVal = document.getElementById("filterSort")?.value || "POPULARITY_DESC";
+            const yearVal = document.getElementById("filterYear")?.value ? parseInt(document.getElementById("filterYear").value) : null;
+            const langVal = document.getElementById("filterLang")?.value || null;
+            const formatVal = document.getElementById("filterFormat")?.value || null;
+
+            // मल्टी-फ़िल्टर सपोर्ट करने वाली AniList GraphQL क्वेरी
+            const query = `
+                query ($page: Int, $search: String, $genre_in: [String], $tag_in: [String], $sort: [MediaSort], $year: Int, $country: CountryCode, $format: MediaFormat) {
+                    Page(page: $page, perPage: 16) {
+                        media(type: ANIME, search: $search, genre_in: $genre_in, tag_in: $tag_in, sort: $sort, seasonYear: $year, countryOfOrigin: $country, format: $format) {
+                            id
+                            title { english romaji }
+                            coverImage { large }
+                            averageScore
+                            episodes
+                            format
+                            seasonYear
+                            countryOfOrigin
+                            genres
+                        }
+                    }
+                }
+            `;
+
+            const variables = { 
+                page: animeVaultPage, 
+                sort: [sortVal] 
+            };
+            
+            // Harem को Tag और बाकी को Genre में भेजना
+            if (selectedGenres.length > 0) {
+                const tags = selectedGenres.filter(g => g === "Harem");
+                const genres = selectedGenres.filter(g => g !== "Harem");
+                if (genres.length > 0) variables.genre_in = genres;
+                if (tags.length > 0) variables.tag_in = tags;
+            }
+
+            if (animeSearchText.trim()) variables.search = animeSearchText.trim();
+            if (yearVal) variables.year = yearVal;
+            if (langVal) variables.country = langVal;
+            if (formatVal) variables.format = formatVal;
+
+            try {
+                const res = await fetch("https://graphql.anilist.co", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ query, variables })
+                });
+                const data = await res.json();
+                const animeList = data?.data?.Page?.media || [];
+
+                if (!append) grid.innerHTML = "";
+                if (animeList.length === 0 && !append) {
+                    grid.innerHTML = "<div style='grid-column: 1/-1; color:var(--accent-red); padding:20px; text-align:center;'>No anime matches all selected filters.</div>";
+                    return;
+                }
+
+                animeList.forEach(anime => {
+                    const title = anime.title.english || anime.title.romaji || "Anime Title";
+                    const score = anime.averageScore ? (anime.averageScore / 10).toFixed(1) : "N/A";
+                    
+                    let langTag = "🇯🇵 Sub | Dub";
+                    if (anime.countryOfOrigin === "CN") langTag = "🇨🇳 Donghua";
+                    if (anime.countryOfOrigin === "KR") langTag = "🇰🇷 Korean";
+
+                    const card = document.createElement("div");
+                    card.className = "anime-card";
+                    card.onclick = () => openAnimeModal(anime.id);
+                    card.innerHTML = `
+                        <img class="anime-poster" src="${anime.coverImage.large}" alt="${escapeHtml(title)}" loading="lazy" referrerpolicy="no-referrer">
+                        <div class="anime-card-content">
+                            <div class="anime-title">${escapeHtml(title)}</div>
+                            <div style="font-size:0.75rem; color:var(--accent-gold); margin-top:2px;">⭐ ${score} / 10</div>
+                            <div style="font-size:0.7rem; color:var(--text-secondary); margin-top:3px; display:flex; justify-content:space-between;">
+                                <span>${anime.seasonYear || anime.format || 'Anime'}</span>
+                                <span style="color:var(--accent-cyan);">${langTag}</span>
+                            </div>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+            } catch(e) {
+                if (!append) grid.innerHTML = "<div style='grid-column: 1/-1; color:var(--accent-red); padding:20px; text-align:center;'>Failed to load anime. Please try again.</div>";
+            }
+        }
+
+        function searchAnime(val) {
+            clearTimeout(animeSearchTimer);
+            animeSearchTimer = setTimeout(() => {
+                animeSearchText = val;
+                animeVaultPage = 1;
+                fetchAnimeVault(false);
+            }, 400);
+        }
+
+        function applyAnimeFilters() {
+            animeVaultPage = 1;
+            fetchAnimeVault(false);
+        }
+
+        function loadMoreAnime() {
+            animeVaultPage++;
+            fetchAnimeVault(true);
+        }
+
+        renderGenreChips();
+        fetchAnimeVault(false);
+                                                                                         
                 container.appendChild(chip);
             });
         }
