@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="referrer" content="no-referrer">
+    
     <title>AniVortex — the world you belong to.</title>
     
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%23040508' rx='90'/%3E%3Cg filter='drop-shadow(0 0 15px %2300f0ff)'%3E%3Cpath d='M60 330 C120 70 340 90 440 240 C420 380 250 420 180 340 C140 290 190 190 280 210' fill='none' stroke='%2300f0ff' stroke-width='28' stroke-linecap='round'/%3E%3C/g%3E%3Cpolygon points='256,60 140,260 256,450 230,260' fill='%232a334a' stroke='%23384566' stroke-width='2'/%3E%3Cpolygon points='256,60 372,260 256,450 282,260' fill='%23141a26' stroke='%23222b3d' stroke-width='2'/%3E%3Cline x1='256' y1='60' x2='140' y2='260' stroke='%23ffffff' stroke-width='4'/%3E%3Cpolygon points='256,230 264,252 286,256 266,268 272,290 256,276 240,290 246,268 226,256 248,252' fill='%23ffffff'/%3E%3C/svg%3E">
@@ -739,12 +741,17 @@
         </div>
     </div>
 
-    <div class="tab-view" id="tab-polls">
+        <div class="tab-view" id="tab-polls">
         <div class="view-title">
             <span>🔥</span> <span id="label-polls">Most Loved Characters</span>
         </div>
+        <input type="text" id="charSearchInput" class="chat-input" style="width:100%; margin-bottom:12px;" placeholder="Search any character (Goku, Naruto, Levi, Luffy...)" oninput="searchCharacters(this.value)">
         <div id="characterList"></div>
-    </div>
+        <button id="loadMoreCharsBtn" onclick="loadMoreCharacters()" style="width:100%; padding:10px; background:var(--bg-card); border:1px solid var(--border); color:var(--accent-cyan); border-radius:8px; font-weight:700; cursor:pointer; margin-top:10px;">
+            ⬇️ Load More Characters
+        </button>
+        </div>
+        
 
     <div class="tab-view" id="tab-anime">
         <div class="view-title">
@@ -1034,8 +1041,80 @@
             renderCommunityChat();
         }
 
+                charactersData = [];
+        let charPage = 1;
+        let charSearchQuery = "";
+        let charVoteOffsets = JSON.parse(localStorage.getItem("anivortex_char_offsets")) || {};
+
+        async function fetchCharacters(page = 1, search = "", append = false) {
+            const container = document.getElementById("characterList");
+            if (!container) return;
+            if (!append) container.innerHTML = "<div style='color:var(--text-secondary); padding:16px;'>Syncing characters from AniList...</div>";
+
+            const query = `
+                query ($page: Int, $search: String) {
+                    Page(page: $page, perPage: 20) {
+                        characters(sort: FAVOURITES_DESC, search: $search) {
+                            id
+                            name { full }
+                            image { large }
+                            favourites
+                            media(type: ANIME, sort: POPULARITY_DESC, perPage: 1) {
+                                nodes {
+                                    title { english romaji }
+                                }
+                            }
+                        }
+                    }
+                }
+            `;
+            const variables = { page: page };
+            if (search.trim()) variables.search = search.trim();
+
+            try {
+                const res = await fetch("https://graphql.anilist.co", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ query, variables })
+                });
+                const data = await res.json();
+                const list = data.data.Page.characters;
+
+                if (!append) charactersData = [];
+                list.forEach(c => {
+                    const animeName = c.media.nodes[0] ? (c.media.nodes[0].title.english || c.media.nodes[0].title.romaji) : "Anime";
+                    charactersData.push({
+                        id: c.id,
+                        name: c.name.full,
+                        anime: animeName,
+                        img: c.image.large,
+                        score: c.favourites + (charVoteOffsets[c.id] || 0)
+                    });
+                });
+                renderCharacters();
+            } catch(e) {
+                if (!append) container.innerHTML = "<div style='color:var(--accent-red); padding:16px;'>Failed to load characters.</div>";
+            }
+        }
+
+        let charSearchTimer = null;
+        function searchCharacters(val) {
+            clearTimeout(charSearchTimer);
+            charSearchTimer = setTimeout(() => {
+                charSearchQuery = val;
+                charPage = 1;
+                fetchCharacters(charPage, charSearchQuery, false);
+            }, 400);
+        }
+
+        function loadMoreCharacters() {
+            charPage++;
+            fetchCharacters(charPage, charSearchQuery, true);
+        }
+
         function renderCharacters() {
             const container = document.getElementById("characterList");
+            if (!container) return;
             container.innerHTML = "";
             charactersData.sort((a, b) => b.score - a.score);
 
@@ -1044,10 +1123,10 @@
                 const card = document.createElement("div");
                 card.className = "char-card";
                 card.innerHTML = `
-                    <img class="char-img" src="${ch.img}" alt="${ch.name}">
+                    <img class="char-img" src="${ch.img}" alt="${escapeHtml(ch.name)}" loading="lazy" referrerpolicy="no-referrer">
                     <div class="char-info">
-                        <div class="char-name">${ch.name}</div>
-                        <div class="char-anime">${ch.anime}</div>
+                        <div class="char-name">${escapeHtml(ch.name)}</div>
+                        <div class="char-anime">${escapeHtml(ch.anime)}</div>
                         <div class="char-score">⭐ ${ch.score.toLocaleString()} Points</div>
                     </div>
                     <div class="vote-actions">
@@ -1068,20 +1147,27 @@
             const char = charactersData.find(c => c.id === charId);
             if (!char) return;
 
+            let diff = 0;
             if (current === action) {
-                char.score += (action === 'promote' ? -1 : 1);
+                diff = (action === 'promote' ? -1 : 1);
                 delete userVotes[charId];
             } else {
-                if (current === 'promote') char.score -= 1;
-                if (current === 'demote') char.score += 1;
-                char.score += (action === 'promote' ? 1 : -1);
+                if (current === 'promote') diff -= 1;
+                if (current === 'demote') diff += 1;
+                diff += (action === 'promote' ? 1 : -1);
                 userVotes[charId] = action;
             }
 
+            char.score += diff;
+            charVoteOffsets[charId] = (charVoteOffsets[charId] || 0) + diff;
+
             localStorage.setItem("anivortex_votes", JSON.stringify(userVotes));
+            localStorage.setItem("anivortex_char_offsets", JSON.stringify(charVoteOffsets));
             renderCharacters();
         }
 
+        fetchCharacters(1, "", false);
+        
         function renderGenreChips() {
             const container = document.getElementById("genreContainer");
             container.innerHTML = "";
