@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Animeverse Polls | Live Global Rankings</title>
+    <title>Animeverse Polls | Ultimate Global Ranking</title>
     
     <!-- Firebase SDK Scripts -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -34,7 +34,7 @@
 
         header {
             text-align: center;
-            padding: 20px 0 25px;
+            padding: 15px 0 20px;
             border-bottom: 1px solid #30363d;
         }
 
@@ -45,15 +45,47 @@
 
         header p {
             color: var(--text-muted);
-            margin-top: 6px;
+            margin-top: 4px;
             font-size: 0.95rem;
         }
 
+        .search-section {
+            max-width: 650px;
+            margin: 15px auto 0;
+            display: flex;
+            gap: 8px;
+        }
+
+        .search-box {
+            flex: 1;
+            padding: 10px 16px;
+            border-radius: 20px;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            color: #fff;
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        .search-box:focus {
+            border-color: var(--accent);
+        }
+
+        .search-btn {
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            padding: 0 18px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
         .container {
-            max-width: 1100px;
-            margin: 25px auto;
+            max-width: 1250px;
+            margin: 20px auto;
             display: grid;
-            grid-template-columns: 2fr 1fr;
+            grid-template-columns: 2.2fr 1fr;
             gap: 25px;
         }
 
@@ -64,20 +96,32 @@
         }
 
         .controls {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             display: flex;
             gap: 8px;
-            flex-wrap: wrap;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            white-space: nowrap;
+        }
+
+        .controls::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        .controls::-webkit-scrollbar-thumb {
+            background: #30363d;
+            border-radius: 4px;
         }
 
         .filter-btn {
             background-color: var(--card-bg);
             border: 1px solid #30363d;
             color: var(--text-main);
-            padding: 8px 14px;
+            padding: 7px 14px;
             border-radius: 20px;
             cursor: pointer;
             font-size: 0.85rem;
+            flex-shrink: 0;
             transition: 0.2s;
         }
 
@@ -87,9 +131,15 @@
             color: #fff;
         }
 
+        .status-msg {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+
         .cards-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
             gap: 14px;
         }
 
@@ -97,29 +147,46 @@
             background: var(--card-bg);
             border: 1px solid #30363d;
             border-radius: 10px;
-            padding: 16px;
+            padding: 12px;
             display: flex;
             flex-direction: column;
             align-items: center;
             text-align: center;
         }
 
+        .card img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 8px;
+            background-color: #21262d;
+            margin-bottom: 8px;
+        }
+
         .card h3 {
-            font-size: 1.05rem;
-            margin-bottom: 4px;
+            font-size: 0.95rem;
+            margin-bottom: 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
         }
 
         .card span.anime-name {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             color: var(--text-muted);
-            margin-bottom: 12px;
+            margin-bottom: 10px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
         }
 
         .card .vote-count {
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             font-weight: bold;
             color: var(--accent);
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
 
         .vote-btn {
@@ -144,6 +211,8 @@
             border-radius: 10px;
             padding: 18px;
             height: fit-content;
+            max-height: 85vh;
+            overflow-y: auto;
         }
 
         .leaderboard h2 {
@@ -151,25 +220,43 @@
             margin-bottom: 14px;
             border-bottom: 1px solid #30363d;
             padding-bottom: 8px;
+            position: sticky;
+            top: 0;
+            background: var(--card-bg);
         }
 
         .rank-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 0;
+            padding: 8px 0;
             border-bottom: 1px solid #21262d;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
 
         .rank-item:last-child {
             border-bottom: none;
         }
 
+        .rank-item-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            overflow: hidden;
+        }
+
+        .rank-item-info img {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
         .rank-badge {
             font-weight: bold;
             color: var(--gold);
-            margin-right: 8px;
+            min-width: 24px;
         }
     </style>
 </head>
@@ -177,26 +264,39 @@
 
     <header>
         <h1>⚡ Animeverse Polls</h1>
-        <p>Real-time Global Community Rankings</p>
+        <p>10,000+ Anime & Characters • Real-time Live Voting</p>
+        
+        <div class="search-section">
+            <input type="text" id="animeSearch" class="search-box" placeholder="Search any anime (e.g. Blue Box, Naruto, One Piece)..." onkeydown="if(event.key==='Enter') searchAnimeFromInput()">
+            <button class="search-btn" onclick="searchAnimeFromInput()">Search</button>
+        </div>
     </header>
 
     <div class="container">
         <main>
-            <div class="controls">
-                <button class="filter-btn active" onclick="filterAnime('All')">All Anime</button>
-                <button class="filter-btn" onclick="filterAnime('Blue Box')">Blue Box</button>
-                <button class="filter-btn" onclick="filterAnime('Attack on Titan')">Attack on Titan</button>
-                <button class="filter-btn" onclick="filterAnime('Jujutsu Kaisen')">Jujutsu Kaisen</button>
+            <div class="controls" id="quickButtons">
+                <button class="filter-btn active" onclick="loadTopGlobalCharacters()">🔥 Top All-Stars</button>
+                <button class="filter-btn" onclick="loadAnimeCharacters('Death Note')">Death Note</button>
+                <button class="filter-btn" onclick="loadAnimeCharacters('Blue Box')">Blue Box</button>
+                <button class="filter-btn" onclick="loadAnimeCharacters('Attack on Titan')">Attack on Titan</button>
+                <button class="filter-btn" onclick="loadAnimeCharacters('One Piece')">One Piece</button>
+                <button class="filter-btn" onclick="loadAnimeCharacters('Jujutsu Kaisen')">Jujutsu Kaisen</button>
+                <button class="filter-btn" onclick="loadAnimeCharacters('Naruto')">Naruto</button>
+                <button class="filter-btn" onclick="loadAnimeCharacters('Dragon Ball')">Dragon Ball</button>
+                <button class="filter-btn" onclick="loadAnimeCharacters('Demon Slayer')">Demon Slayer</button>
+                <button class="filter-btn" onclick="loadAnimeCharacters('Solo Leveling')">Solo Leveling</button>
+                <button class="filter-btn" onclick="loadAnimeCharacters('Bleach')">Bleach</button>
             </div>
 
-            <div class="cards-grid" id="cardsGrid">
-                <p style="color: var(--text-muted);">Database se load ho raha hai...</p>
-            </div>
+            <div class="status-msg" id="statusMsg">Top global anime characters load ho rahe hain...</div>
+            <div class="cards-grid" id="cardsGrid"></div>
         </main>
 
         <aside class="leaderboard">
-            <h2>🏆 Leaderboard</h2>
-            <div id="leaderboardList"></div>
+            <h2>🏆 Live Leaderboard</h2>
+            <div id="leaderboardList">
+                <p style="color: var(--text-muted);">Votes load ho rahe hain...</p>
+            </div>
         </aside>
     </div>
 
@@ -215,83 +315,192 @@
         const database = firebase.database();
         const charsRef = database.ref('characters');
 
-        const initialCharacters = {
-            "chinatsu": { name: "Chinatsu Kano", anime: "Blue Box", votes: 0 },
-            "hina": { name: "Hina Chono", anime: "Blue Box", votes: 0 },
-            "taiki": { name: "Taiki Inomata", anime: "Blue Box", votes: 0 },
-            "levi": { name: "Levi Ackerman", anime: "Attack on Titan", votes: 0 },
-            "eren": { name: "Eren Yeager", anime: "Attack on Titan", votes: 0 },
-            "gojo": { name: "Satoru Gojo", anime: "Jujutsu Kaisen", votes: 0 }
-        };
-
-        let charactersData = {};
-        let currentFilter = 'All';
-
-        charsRef.once('value', (snapshot) => {
-            if (!snapshot.exists()) {
-                charsRef.set(initialCharacters);
-            }
-        });
+        let liveVotesData = {};
+        let currentLoadedCharacters = [];
 
         charsRef.on('value', (snapshot) => {
-            charactersData = snapshot.val() || {};
-            renderCards();
+            liveVotesData = snapshot.val() || {};
+            updateCardsVotes();
             renderLeaderboard();
         });
+
+        async function loadTopGlobalCharacters() {
+            setActiveButton('🔥 Top All-Stars');
+            document.getElementById('statusMsg').innerText = "🔥 Top 40 Most Popular Characters load ho rahe hain...";
+            const query = `
+            query {
+              Page(page: 1, perPage: 40) {
+                characters(sort: FAVOURITES_DESC) {
+                  id
+                  name { full }
+                  image { large }
+                  media(type: ANIME, sort: POPULARITY_DESC) {
+                    nodes {
+                      title { english romaji }
+                    }
+                  }
+                }
+              }
+            }`;
+            
+            try {
+                const res = await fetch('https://graphql.anilist.co', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query })
+                });
+                const data = await res.json();
+                const list = data.data.Page.characters.map(c => ({
+                    id: 'char_' + c.id,
+                    name: c.name.full,
+                    image: c.image.large,
+                    anime: (c.media.nodes[0] && (c.media.nodes[0].title.english || c.media.nodes[0].title.romaji)) || 'Anime'
+                }));
+                currentLoadedCharacters = list;
+                document.getElementById('statusMsg').innerText = "Top 40 All-Stars:";
+                renderCards();
+            } catch (err) {
+                document.getElementById('statusMsg').innerText = "Data load karne me problem aayi, kripya refresh karein.";
+            }
+        }
+
+        async function loadAnimeCharacters(animeName) {
+            setActiveButton(animeName);
+            document.getElementById('statusMsg').innerText = `"${animeName}" ke characters fetch ho rahe hain...`;
+            
+            const query = `
+            query ($search: String) {
+              Media(search: $search, type: ANIME) {
+                id
+                title { english romaji }
+                characters(page: 1, perPage: 40) {
+                  nodes {
+                    id
+                    name { full }
+                    image { large }
+                  }
+                }
+              }
+            }`;
+
+            try {
+                const res = await fetch('https://graphql.anilist.co', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query, variables: { search: animeName } })
+                });
+                const data = await res.json();
+                const media = data.data.Media;
+                if (!media || !media.characters || media.characters.nodes.length === 0) {
+                    document.getElementById('statusMsg').innerText = `"${animeName}" nahi mila. Kisi aur anime ka naam search karein!`;
+                    return;
+                }
+
+                const title = media.title.english || media.title.romaji || animeName;
+                currentLoadedCharacters = media.characters.nodes.map(c => ({
+                    id: 'char_' + c.id,
+                    name: c.name.full,
+                    image: c.image.large,
+                    anime: title
+                }));
+
+                document.getElementById('statusMsg').innerText = `Showing ${currentLoadedCharacters.length} characters from ${title}:`;
+                renderCards();
+            } catch (err) {
+                document.getElementById('statusMsg').innerText = "Search karne me samasya aayi. Kripya dobara try karein.";
+            }
+        }
+
+        function searchAnimeFromInput() {
+            const input = document.getElementById('animeSearch');
+            const val = input.value.trim();
+            if (val) {
+                loadAnimeCharacters(val);
+            }
+        }
 
         function renderCards() {
             const grid = document.getElementById('cardsGrid');
             grid.innerHTML = '';
 
-            Object.keys(charactersData).forEach(key => {
-                const char = charactersData[key];
+            currentLoadedCharacters.forEach(char => {
+                const votes = (liveVotesData[char.id] && liveVotesData[char.id].votes) || 0;
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.id = 'card-' + char.id;
+                card.innerHTML = `
+                    <img src="${char.image}" alt="${char.name}" loading="lazy">
+                    <h3 title="${char.name}">${char.name}</h3>
+                    <span class="anime-name" title="${char.anime}">${char.anime}</span>
+                    <div class="vote-count" id="vote-${char.id}">${votes} Votes</div>
+                    <button class="vote-btn" onclick="castVote('${char.id}', '${escapeQuotes(char.name)}', '${escapeQuotes(char.anime)}', '${char.image}')">Vote +1</button>
+                `;
+                grid.appendChild(card);
+            });
+        }
 
-                if (currentFilter === 'All' || char.anime === currentFilter) {
-                    const card = document.createElement('div');
-                    card.className = 'card';
-                    card.innerHTML = `
-                        <h3>${char.name}</h3>
-                        <span class="anime-name">${char.anime}</span>
-                        <div class="vote-count">${char.votes || 0} Votes</div>
-                        <button class="vote-btn" onclick="castVote('${key}')">Vote +1</button>
-                    `;
-                    grid.appendChild(card);
+        function updateCardsVotes() {
+            currentLoadedCharacters.forEach(char => {
+                const el = document.getElementById('vote-' + char.id);
+                if (el) {
+                    const count = (liveVotesData[char.id] && liveVotesData[char.id].votes) || 0;
+                    el.innerText = count + ' Votes';
                 }
             });
+        }
+
+        function castVote(charId, name, anime, image) {
+            const charRef = charsRef.child(charId);
+            charRef.child('votes').set(firebase.database.ServerValue.increment(1));
+            charRef.child('name').set(name);
+            charRef.child('anime').set(anime);
+            charRef.child('image').set(image);
         }
 
         function renderLeaderboard() {
             const list = document.getElementById('leaderboardList');
             list.innerHTML = '';
 
-            const sortedList = Object.values(charactersData).sort((a, b) => (b.votes || 0) - (a.votes || 0));
+            const sorted = Object.values(liveVotesData)
+                .filter(c => c.votes > 0)
+                .sort((a, b) => (b.votes || 0) - (a.votes || 0))
+                .slice(0, 15);
 
-            sortedList.forEach((char, index) => {
+            if (sorted.length === 0) {
+                list.innerHTML = '<p style="color: var(--text-muted); font-size: 0.85rem;">Abhi tak koi vote nahi pada hai. Kisi bhi character ko pehla vote dein!</p>';
+                return;
+            }
+
+            sorted.forEach((char, index) => {
                 const item = document.createElement('div');
                 item.className = 'rank-item';
                 item.innerHTML = `
-                    <div>
+                    <div class="rank-item-info">
                         <span class="rank-badge">#${index + 1}</span>
-                        <strong>${char.name}</strong> <small>(${char.anime})</small>
+                        <img src="${char.image || 'https://via.placeholder.com/40'}" alt="">
+                        <div>
+                            <strong>${char.name}</strong><br>
+                            <small style="color: var(--text-muted)">${char.anime}</small>
+                        </div>
                     </div>
-                    <span><strong>${char.votes || 0}</strong></span>
+                    <span><strong>${char.votes}</strong></span>
                 `;
                 list.appendChild(item);
             });
         }
 
-        function castVote(charKey) {
-            charsRef.child(charKey + '/votes').set(firebase.database.ServerValue.increment(1));
+        function setActiveButton(name) {
+            const btns = document.querySelectorAll('.filter-btn');
+            btns.forEach(b => {
+                b.classList.toggle('active', b.innerText.includes(name));
+            });
         }
 
-        function filterAnime(category) {
-            currentFilter = category;
-            const buttons = document.querySelectorAll('.filter-btn');
-            buttons.forEach(btn => {
-                btn.classList.toggle('active', btn.innerText === category || (category === 'All' && btn.innerText === 'All Anime'));
-            });
-            renderCards();
+        function escapeQuotes(str) {
+            return (str || '').replace(/'/g, "\\'");
         }
+
+        loadTopGlobalCharacters();
     </script>
 </body>
 </html>
