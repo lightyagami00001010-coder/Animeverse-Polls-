@@ -1417,60 +1417,7 @@
         renderGenreChips();
         fetchAnimeVault(false);
                                                                                          
-                container.appendChild(chip);
-            });
-        }
-
-            async function fetchAnimeByGenre(genre) {
-        const grid = document.getElementById("animeGrid");
-        grid.innerHTML = "<div style='color:var(--text-secondary); padding:20px;'>Syncing official AniList data...</div>";
-
-        const query = `
-            query ($genre: String) {
-                Page(page: 1, perPage: 12) {
-                    media(type: ANIME, sort: POPULARITY_DESC, genre: $genre) {
-                        id
-                        title { english romaji }
-                        coverImage { extraLarge }
-                        averageScore
-                        seasonYear
-                        genres
-                    }
-                }
-            }
-        `;
-        const variables = genre === "All" ? {} : { genre: genre };
-
-        try {
-            const res = await fetch("https://graphql.anilist.co", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ query, variables })
-            });
-            const data = await res.json();
-            const list = data.data.Page.media;
-
-            grid.innerHTML = "";
-            list.forEach(anime => {
-                const title = anime.title.english || anime.title.romaji;
-                const officialRating = anime.averageScore ? (anime.averageScore / 10).toFixed(1) : "8.5";
-
-                const card = document.createElement("div");
-                card.className = "anime-card";
-                card.onclick = () => openAnimeDetailModal(anime.id, title, anime.seasonYear, anime.genres, officialRating);
-                card.innerHTML = `
-                    <img class="anime-poster" src="${anime.coverImage.extraLarge}" alt="${title}" loading="lazy">
-                    <div class="anime-card-content">
-                        <div class="anime-card-title">${title}</div>
-                        <div class="anime-card-rating">🌐 Official: ⭐ ${officialRating} / 10</div>
-                    </div>
-                `;
-                grid.appendChild(card);
-            });
-        } catch (e) {
-            grid.innerHTML = "<div style='color:var(--accent-red); padding:20px;'>Failed to load AniList feeds.</div>";
-        }
-    }
+                
 
     async function openAnimeDetailModal(id, title, year, genres, officialRating) {
         currentModalAnimeId = id;
