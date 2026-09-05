@@ -1122,7 +1122,8 @@
             if (search.trim()) variables.search = search.trim();
 
             try {
-                const res = await fetch("https://graphql.anilist.co", {
+                const res = await fetch("https://corsproxy.io/?url=https://graphql.anilist.co", {
+                    
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ query, variables })
@@ -1353,7 +1354,8 @@
             if (formatVal) variables.format = formatVal;
 
             try {
-                const res = await fetch("https://graphql.anilist.co", {
+                const res = await fetch("https://corsproxy.io/?https://graphql.anilist.co", {
+                    
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ query, variables })
