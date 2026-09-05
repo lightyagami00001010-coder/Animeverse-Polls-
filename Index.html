@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animeverse Polls | Live Global Rankings</title>
+    
+    <!-- Firebase SDK Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --card-bg: #161b22;
+            --accent: #58a6ff;
+            --text-main: #f0f6fc;
+            --text-muted: #8b949e;
+            --gold: #f1e05a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding: 16px;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px 0 25px;
+            border-bottom: 1px solid #30363d;
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            color: var(--accent);
+        }
+
+        header p {
+            color: var(--text-muted);
+            margin-top: 6px;
+            font-size: 0.95rem;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 25px auto;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 25px;
+        }
+
+        @media (max-width: 850px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .controls {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            background-color: var(--card-bg);
+            border: 1px solid #30363d;
+            color: var(--text-main);
+            padding: 8px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: 0.2s;
+        }
+
+        .filter-btn.active, .filter-btn:hover {
+            background-color: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 14px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid #30363d;
+            border-radius: 10px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .card h3 {
+            font-size: 1.05rem;
+            margin-bottom: 4px;
+        }
+
+        .card span.anime-name {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+
+        .card .vote-count {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--accent);
+            margin-bottom: 12px;
+        }
+
+        .vote-btn {
+            width: 100%;
+            background: #238636;
+            border: none;
+            color: #fff;
+            padding: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+
+        .vote-btn:hover {
+            background: #2ea043;
+        }
+
+        .leaderboard {
+            background: var(--card-bg);
+            border: 1px solid #30363d;
+            border-radius: 10px;
+            padding: 18px;
+            height: fit-content;
+        }
+
+        .leaderboard h2 {
+            font-size: 1.2rem;
+            margin-bottom: 14px;
+            border-bottom: 1px solid #30363d;
+            padding-bottom: 8px;
+        }
+
+        .rank-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #21262d;
+            font-size: 0.9rem;
+        }
+
+        .rank-item:last-child {
+            border-bottom: none;
+        }
+
+        .rank-badge {
+            font-weight: bold;
+            color: var(--gold);
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>⚡ Animeverse Polls</h1>
+        <p>Real-time Global Community Rankings</p>
+    </header>
+
+    <div class="container">
+        <main>
+            <div class="controls">
+                <button class="filter-btn active" onclick="filterAnime('All')">All Anime</button>
+                <button class="filter-btn" onclick="filterAnime('Blue Box')">Blue Box</button>
+                <button class="filter-btn" onclick="filterAnime('Attack on Titan')">Attack on Titan</button>
+                <button class="filter-btn" onclick="filterAnime('Jujutsu Kaisen')">Jujutsu Kaisen</button>
+            </div>
+
+            <div class="cards-grid" id="cardsGrid">
+                <p style="color: var(--text-muted);">Database se load ho raha hai...</p>
+            </div>
+        </main>
+
+        <aside class="leaderboard">
+            <h2>🏆 Leaderboard</h2>
+            <div id="leaderboardList"></div>
+        </aside>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDHYMNZl8DcJX_bYzQj0Nk7UfbSQhAx8Rg",
+            authDomain: "animeverse-polls.firebaseapp.com",
+            databaseURL: "https://animeverse-polls-default-rtdb.firebaseio.com",
+            projectId: "animeverse-polls",
+            storageBucket: "animeverse-polls.firebasestorage.app",
+            messagingSenderId: "990391315878",
+            appId: "1:990391315878:web:a737df1ee6b426407b7367"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const charsRef = database.ref('characters');
+
+        const initialCharacters = {
+            "chinatsu": { name: "Chinatsu Kano", anime: "Blue Box", votes: 0 },
+            "hina": { name: "Hina Chono", anime: "Blue Box", votes: 0 },
+            "taiki": { name: "Taiki Inomata", anime: "Blue Box", votes: 0 },
+            "levi": { name: "Levi Ackerman", anime: "Attack on Titan", votes: 0 },
+            "eren": { name: "Eren Yeager", anime: "Attack on Titan", votes: 0 },
+            "gojo": { name: "Satoru Gojo", anime: "Jujutsu Kaisen", votes: 0 }
+        };
+
+        let charactersData = {};
+        let currentFilter = 'All';
+
+        charsRef.once('value', (snapshot) => {
+            if (!snapshot.exists()) {
+                charsRef.set(initialCharacters);
+            }
+        });
+
+        charsRef.on('value', (snapshot) => {
+            charactersData = snapshot.val() || {};
+            renderCards();
+            renderLeaderboard();
+        });
+
+        function renderCards() {
+            const grid = document.getElementById('cardsGrid');
+            grid.innerHTML = '';
+
+            Object.keys(charactersData).forEach(key => {
+                const char = charactersData[key];
+
+                if (currentFilter === 'All' || char.anime === currentFilter) {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.innerHTML = `
+                        <h3>${char.name}</h3>
+                        <span class="anime-name">${char.anime}</span>
+                        <div class="vote-count">${char.votes || 0} Votes</div>
+                        <button class="vote-btn" onclick="castVote('${key}')">Vote +1</button>
+                    `;
+                    grid.appendChild(card);
+                }
+            });
+        }
+
+        function renderLeaderboard() {
+            const list = document.getElementById('leaderboardList');
+            list.innerHTML = '';
+
+            const sortedList = Object.values(charactersData).sort((a, b) => (b.votes || 0) - (a.votes || 0));
+
+            sortedList.forEach((char, index) => {
+                const item = document.createElement('div');
+                item.className = 'rank-item';
+                item.innerHTML = `
+                    <div>
+                        <span class="rank-badge">#${index + 1}</span>
+                        <strong>${char.name}</strong> <small>(${char.anime})</small>
+                    </div>
+                    <span><strong>${char.votes || 0}</strong></span>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        function castVote(charKey) {
+            charsRef.child(charKey + '/votes').set(firebase.database.ServerValue.increment(1));
+        }
+
+        function filterAnime(category) {
+            currentFilter = category;
+            const buttons = document.querySelectorAll('.filter-btn');
+            buttons.forEach(btn => {
+                btn.classList.toggle('active', btn.innerText === category || (category === 'All' && btn.innerText === 'All Anime'));
+            });
+            renderCards();
+        }
+    </script>
+</body>
+</html>
