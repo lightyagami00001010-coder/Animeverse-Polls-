@@ -1143,7 +1143,8 @@
                 });
                 renderCharacters();
             } catch(e) {
-                if (!append) container.innerHTML = "<div style='color:var(--accent-red); padding:16px;'>Failed to load characters.</div>";
+                                if (!append) container.innerHTML = `<div style='color:red; padding:16px;'>Error: ${e.message}</div>`;
+                
             }
         }
 
@@ -1391,7 +1392,8 @@
                     grid.appendChild(card);
                 });
             } catch(e) {
-                if (!append) grid.innerHTML = "<div style='grid-column: 1/-1; color:var(--accent-red); padding:20px; text-align:center;'>Failed to load anime. Please try again.</div>";
+                                if (!append) grid.innerHTML = `<div style='grid-column: 1/-1; color:red; padding:20px; text-align:center;'>Error: ${e.message}</div>`;
+                
             }
         }
 
