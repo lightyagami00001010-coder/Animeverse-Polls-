@@ -8,26 +8,34 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { background: #0b0f19; color: #f8fafc; padding-bottom: 75px; -webkit-tap-highlight-color: transparent; }
+    
+    /* Header */
     header { background: #111827; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1f2937; position: sticky; top: 0; z-index: 50; }
     .brand { display: flex; align-items: center; gap: 8px; }
     .brand-title { font-size: 19px; font-weight: 800; color: #38bdf8; }
+    
+    /* Navigation */
     .tab-content { display: none; }
     .tab-content.active { display: block; }
     .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 60px; background: #111827; border-top: 1px solid #1f2937; display: flex; justify-content: space-around; align-items: center; z-index: 100; }
     .nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; color: #64748b; font-size: 11px; cursor: pointer; border: none; background: none; flex: 1; }
     .nav-item.active { color: #38bdf8; font-weight: bold; }
+
+    /* Poll Cards */
     .poll-card { background: #161f30; border: 1px solid #23324a; border-radius: 14px; padding: 16px; margin: 14px 12px; box-shadow: 0 4px 14px rgba(0,0,0,0.4); }
     .poll-badge { display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 12px; }
     .timer-pill { background: #0f172a; padding: 3px 8px; border-radius: 20px; color: #f59e0b; border: 1px solid #334155; font-family: monospace; }
     .versus-box { display: flex; align-items: center; justify-content: space-around; margin: 10px 0 16px; }
     .fig-wrap { text-align: center; width: 42%; }
-    .fig-img { width: 75px; height: 75px; border-radius: 50%; object-fit: cover; border: 2px solid #38bdf8; margin: 0 auto 6px; }
+    .fig-img { width: 75px; height: 75px; border-radius: 50%; object-fit: cover; border: 2px solid #38bdf8; margin: 0 auto 6px; display: block; background: #1e293b; }
     .fig-name { font-size: 13px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .fig-anime { font-size: 10px; color: #94a3b8; }
     .btn-grid { display: flex; gap: 10px; }
     .vote-btn { flex: 1; border: none; padding: 11px 6px; border-radius: 10px; font-weight: 700; font-size: 12px; color: #fff; cursor: pointer; }
     .btn-male-1 { background: #2563eb; } .btn-male-2 { background: #dc2626; }
     .btn-female-1 { background: #db2777; } .btn-female-2 { background: #7c3aed; }
+    
+    /* Dual Results Bar */
     .results-box { display: none; margin-top: 14px; }
     .bar-shell { height: 24px; background: #0f172a; border-radius: 8px; overflow: hidden; display: flex; border: 1px solid #334155; }
     .bar-fill-1 { height: 100%; transition: width 0.6s ease; display: flex; align-items: center; padding-left: 8px; font-size: 11px; font-weight: bold; }
@@ -35,9 +43,11 @@
     .stats-label { display: flex; justify-content: space-between; font-size: 11px; margin-top: 6px; font-weight: 600; color: #cbd5e1; }
     .share-tray { display: flex; gap: 8px; margin-top: 14px; padding-top: 10px; border-top: 1px solid #23324a; }
     .share-btn { flex: 1; padding: 7px 0; border-radius: 6px; font-size: 12px; font-weight: 600; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; color: #fff; }
+
+    /* Character Ranking */
     .search-input { width: 100%; background: #111827; border: 1px solid #1f2937; padding: 11px 14px; border-radius: 10px; color: #fff; font-size: 13px; outline: none; }
     .char-card { background: #111827; border: 1px solid #1f2937; border-radius: 12px; padding: 10px 12px; margin: 8px 12px; display: flex; align-items: center; gap: 12px; position: relative; }
-    .char-img { width: 50px; height: 50px; border-radius: 10px; object-fit: cover; }
+    .char-img { width: 50px; height: 50px; border-radius: 10px; object-fit: cover; background: #1e293b; }
     .char-info { flex: 1; }
     .char-name { font-weight: 700; font-size: 14px; color: #f8fafc; }
     .char-anime { font-size: 11px; color: #94a3b8; }
@@ -46,20 +56,24 @@
     .rank-btn { padding: 5px 9px; border-radius: 6px; border: none; font-size: 10px; font-weight: 700; cursor: pointer; color: white; }
     .btn-promote { background: #d97706; } .btn-demote { background: #475569; }
     .voted-badge { font-size: 10px; background: #1e293b; color: #4ade80; padding: 4px 6px; border-radius: 4px; border: 1px solid #334155; }
-    .floater { position: absolute; right: 20px; font-weight: 800; font-size: 14px; animation: floatAnim 0.7s forwards; }
+    .floater { position: absolute; right: 20px; font-weight: 800; font-size: 14px; animation: floatAnim 0.7s forwards; pointer-events: none; }
     @keyframes floatAnim { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-20px); } }
+
+    /* Anime Vault */
     .genre-row { display: flex; gap: 8px; overflow-x: auto; padding: 6px 12px; scrollbar-width: none; }
     .genre-row::-webkit-scrollbar { display: none; }
     .genre-chip { background: #161f30; color: #94a3b8; border: 1px solid #23324a; padding: 6px 14px; border-radius: 20px; font-size: 12px; white-space: nowrap; cursor: pointer; }
     .genre-chip.active { background: #38bdf8; color: #0b0f19; font-weight: 700; border-color: #38bdf8; }
     .anime-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 12px; }
     .anime-card { background: #111827; border: 1px solid #1f2937; border-radius: 12px; overflow: hidden; cursor: pointer; }
-    .anime-poster { width: 100%; height: 180px; object-fit: cover; }
+    .anime-poster { width: 100%; height: 180px; object-fit: cover; background: #1e293b; }
     .anime-detail { padding: 8px 10px; }
     .anime-title { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff; }
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 200; padding: 16px; }
     .modal-box { background: #161f30; border: 1px solid #2e3d55; border-radius: 16px; width: 100%; max-width: 360px; padding: 16px; position: relative; max-height: 85vh; overflow-y: auto; }
     .modal-close { position: absolute; right: 12px; top: 12px; background: none; border: none; color: #94a3b8; font-size: 18px; cursor: pointer; }
+
+    /* Community */
     .chat-shell { height: calc(100vh - 195px); display: flex; flex-direction: column; padding: 12px; }
     .chat-msgs { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
     .chat-bubble { background: #161f30; border: 1px solid #23324a; border-radius: 10px; padding: 10px 12px; max-width: 85%; }
@@ -93,13 +107,13 @@
     </div>
   </section>
 
-  <!-- TAB 2: POLLS (ISOLATED TO THIS TAB ONLY) -->
+  <!-- TAB 2: POLLS -->
   <section id="sec-polls" class="tab-content active">
     <!-- Male Battle -->
     <div class="poll-card">
       <div class="poll-badge">
         <span style="color: #38bdf8;">⚡ Daily Face-Off</span>
-        <span class="timer-pill" id="male-timer">00:00:00</span>
+        <span class="timer-pill" id="male-timer">12:00:00</span>
       </div>
       <div class="versus-box" id="male-vs"></div>
       <div class="btn-grid" id="male-btns">
@@ -123,7 +137,7 @@
     <div class="poll-card">
       <div class="poll-badge">
         <span style="color: #ec4899;">✨ Beauty Showdown</span>
-        <span class="timer-pill" id="female-timer">00:00:00</span>
+        <span class="timer-pill" id="female-timer">12:00:00</span>
       </div>
       <div class="versus-box" id="female-vs"></div>
       <div class="btn-grid" id="female-btns">
@@ -143,32 +157,32 @@
       </div>
     </div>
 
-    <!-- Character Ranking with 1-Vote Lock -->
+    <!-- 20+ Characters Ranking with 1-Vote Lock -->
     <div style="padding: 10px 14px 4px;">
       <h3 style="font-size: 15px; font-weight: 800; color: #fff;"><i class="fa-solid fa-fire" style="color: #f59e0b;"></i> Most Loved Characters</h3>
     </div>
     <div style="padding: 0 12px; margin: 8px 0;">
-      <input type="text" id="char-search" class="search-input" placeholder="Search character (Levi, Gojo, Zoro...)" oninput="filterCharacters()">
+      <input type="text" id="char-search" class="search-input" placeholder="Search character (Levi, Gojo, Zoro, Luffy...)" oninput="filterCharacters()">
     </div>
     <div id="character-list"></div>
   </section>
 
-  <!-- TAB 3: ANIME VAULT (CONNECTED TO 25,000+ ANIME VIA JIKAN API) -->
+  <!-- TAB 3: ANIME VAULT (HAREM & 10,000+ GLOBAL API SEARCH) -->
   <section id="sec-anime" class="tab-content">
     <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 14px 6px;">
       <h3 style="font-size: 16px; font-weight: 800; color: #fff;"><i class="fa-solid fa-film" style="color: #38bdf8;"></i> Anime Vault</h3>
       <button onclick="surpriseAnime()" style="background: #1e293b; color: #f59e0b; border: 1px solid #334155; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; cursor: pointer;">🎲 Surprise Me</button>
     </div>
     <div style="padding: 0 12px 6px;">
-      <input type="text" id="vault-search" class="search-input" placeholder="Search 25,000+ anime globally..." oninput="handleVaultSearch()">
+      <input type="text" id="vault-search" class="search-input" placeholder="Search 10,000+ anime globally..." oninput="handleVaultSearch()">
     </div>
     <div class="genre-row">
       <div class="genre-chip active" onclick="loadGenre('all', this)">All</div>
-      <div class="genre-chip" onclick="loadGenre(9, this)">Harem</div>
-      <div class="genre-chip" onclick="loadGenre(1, this)">Action</div>
-      <div class="genre-chip" onclick="loadGenre(22, this)">Romance</div>
-      <div class="genre-chip" onclick="loadGenre(4, this)">Comedy</div>
-      <div class="genre-chip" onclick="loadGenre(37, this)">Supernatural</div>
+      <div class="genre-chip" onclick="loadGenre('harem', this)">Harem</div>
+      <div class="genre-chip" onclick="loadGenre('action', this)">Action</div>
+      <div class="genre-chip" onclick="loadGenre('romance', this)">Romance</div>
+      <div class="genre-chip" onclick="loadGenre('comedy', this)">Comedy</div>
+      <div class="genre-chip" onclick="loadGenre('supernatural', this)">Supernatural</div>
     </div>
     <div class="anime-grid" id="anime-grid"></div>
   </section>
@@ -185,7 +199,7 @@
     </div>
   </section>
 
-  <!-- Modal Popup -->
+  <!-- Details Popup -->
   <div class="modal-overlay" id="anime-modal">
     <div class="modal-box">
       <button class="modal-close" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
@@ -204,82 +218,93 @@
   </nav>
 
   <script>
-  (function() {
-    function vibe(ms=40) { if (navigator.vibrate) navigator.vibrate(ms); }
-    window.switchTab = function(t, el) {
-      vibe(30);
-      document.querySelectorAll('.tab-content').forEach(s => s.classList.remove('active'));
-      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-      document.getElementById('sec-' + t).classList.add('active');
-      if (el) el.classList.add('active');
-      window.scrollTo(0, 0);
-    };
+  // 1. Navigation Logic
+  function vibe(ms) {
+    if (!ms) ms = 40;
+    if (window.navigator && window.navigator.vibrate) {
+      window.navigator.vibrate(ms);
+    }
+  }
 
-    function getIST() {
-      const now = new Date();
-      const ist = new Date(now.getTime() + (now.getTimezoneOffset() * 60000) + (3600000 * 5.5));
-      const start = new Date(ist.getFullYear(), 0, 0);
-      const dayOfYear = Math.floor((ist - start) / (1000 * 60 * 60 * 24));
-      const midnight = new Date(ist); midnight.setHours(24, 0, 0, 0);
-      return { dayOfYear, secLeft: Math.max(0, Math.floor((midnight - ist) / 1000)), dateStr: ist.toDateString() };
+  function switchTab(t, el) {
+    vibe(30);
+    var contents = document.querySelectorAll('.tab-content');
+    for (var i = 0; i < contents.length; i++) contents[i].classList.remove('active');
+    var navs = document.querySelectorAll('.nav-item');
+    for (var j = 0; j < navs.length; j++) navs[j].classList.remove('active');
+    
+    var target = document.getElementById('sec-' + t);
+    if (target) target.classList.add('active');
+    if (el) el.classList.add('active');
+    window.scrollTo(0, 0);
+  }
+
+  // 2. Indian Standard Time (IST) Calculation
+  function getIST() {
+    var now = new Date();
+    var ist = new Date(now.getTime() + (now.getTimezoneOffset() * 60000) + (3600000 * 5.5));
+    var start = new Date(ist.getFullYear(), 0, 0);
+    var diff = ist - start;
+    var dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
+    var midnight = new Date(ist);
+    midnight.setHours(24, 0, 0, 0);
+    var secLeft = Math.max(0, Math.floor((midnight - ist) / 1000));
+    return { dayOfYear: dayOfYear, secLeft: secLeft, dateStr: ist.toDateString() };
+  }
+
+  var istData = getIST();
+  var dayOfYear = istData.dayOfYear;
+  var dateStr = istData.dateStr;
+
+  setInterval(function() {
+    var data = getIST();
+    var h = String(Math.floor(data.secLeft / 3600));
+    var m = String(Math.floor((data.secLeft % 3600) / 60));
+    var s = String(data.secLeft % 60);
+    if (h.length < 2) h = "0" + h;
+    if (m.length < 2) m = "0" + m;
+    if (s.length < 2) s = "0" + s;
+    var timerText = h + ":" + m + ":" + s;
+    var mTimer = document.getElementById('male-timer');
+    var fTimer = document.getElementById('female-timer');
+    if (mTimer) mTimer.innerText = timerText;
+    if (fTimer) fTimer.innerText = timerText;
+  }, 1000);
+
+  // 3. Official AniList CDN Polls Data
+  var maleBattles = [
+    { c1: "Satoru Gojo", a1: "Jujutsu Kaisen", img1: "https://s4.anilist.co/file/anilistcdn/character/large/b127518-2587Xn7g2uG.png", c2: "Kakashi Hatake", a2: "Naruto", img2: "https://s4.anilist.co/file/anilistcdn/character/large/b1-gDq62YLwPvh.png" },
+    { c1: "Monkey D. Luffy", a1: "One Piece", img1: "https://s4.anilist.co/file/anilistcdn/character/large/b40-gN5U4YhBBt.png", c2: "Naruto Uzumaki", a2: "Naruto", img2: "https://s4.anilist.co/file/anilistcdn/character/large/b17-8zSW2eEF7QY.png" },
+    { c1: "Levi Ackerman", a1: "Attack on Titan", img1: "https://s4.anilist.co/file/anilistcdn/character/large/b45627-5PscIW7WpM3e.png", c2: "Roronoa Zoro", a2: "One Piece", img2: "https://s4.anilist.co/file/anilistcdn/character/large/b62-mP5NOtZYIqV.png" },
+    { c1: "Light Yagami", a1: "Death Note", img1: "https://s4.anilist.co/file/anilistcdn/character/large/b71-rJq8Se3uJ1.png", c2: "L Lawliet", a2: "Death Note", img2: "https://s4.anilist.co/file/anilistcdn/character/large/b73-1q2s3d4fqGh.png" }
+  ];
+
+  var femaleBattles = [
+    { c1: "Yor Forger", a1: "Spy x Family", img1: "https://s4.anilist.co/file/anilistcdn/character/large/b162985-JbL35GgJc0B2.png", c2: "Boa Hancock", a2: "One Piece", img2: "https://s4.anilist.co/file/anilistcdn/character/large/b14945-4DSebsFb6c9d.png" },
+    { c1: "Marin Kitagawa", a1: "My Dress-Up Darling", img1: "https://s4.anilist.co/file/anilistcdn/character/large/b144883-dBYRr7xB5cA.png", c2: "Mai Sakurajima", a2: "Bunny Girl Senpai", img2: "https://s4.anilist.co/file/anilistcdn/character/large/b118739-afb2c3c4e516.png" },
+    { c1: "Hinata Hyuga", a1: "Naruto", img1: "https://s4.anilist.co/file/anilistcdn/character/large/b1555-fk8b0c162e3f.png", c2: "Mikasa Ackerman", a2: "Attack on Titan", img2: "https://s4.anilist.co/file/anilistcdn/character/large/b40882-0f1e2d3c4b5a.png" }
+  ];
+
+  var curMale = maleBattles[dayOfYear % maleBattles.length];
+  var curFemale = femaleBattles[dayOfYear % femaleBattles.length];
+
+  function setupPoll(type, m) {
+    var p = (type === 'male') ? 'm' : 'f';
+    var vsBox = document.getElementById(type + '-vs');
+    if (vsBox) {
+      vsBox.innerHTML = 
+        '<div class="fig-wrap"><img src="' + m.img1 + '" class="fig-img"><div class="fig-name">' + m.c1 + '</div><div class="fig-anime">' + m.a1 + '</div></div>' +
+        '<div style="font-weight:900; color:#f59e0b; font-size:16px;">VS</div>' +
+        '<div class="fig-wrap"><img src="' + m.img2 + '" class="fig-img"><div class="fig-name">' + m.c2 + '</div><div class="fig-anime">' + m.a2 + '</div></div>';
     }
 
-    const { dayOfYear, dateStr } = getIST();
+    var btn1 = document.getElementById(p + '-btn-1');
+    var btn2 = document.getElementById(p + '-btn-2');
+    if (btn1) btn1.innerText = "Vote " + m.c1;
+    if (btn2) btn2.innerText = "Vote " + m.c2;
 
-    setInterval(() => {
-      const { secLeft } = getIST();
-      const t = `${String(Math.floor(secLeft/3600)).padStart(2,'0')}:${String(Math.floor((secLeft%3600)/60)).padStart(2,'0')}:${String(secLeft%60).padStart(2,'0')}`;
-      document.getElementById('male-timer').innerText = t;
-      document.getElementById('female-timer').innerText = t;
-    }, 1000);
-
-    // Official AniList High-Res Characters Data
-    const maleBattles = [
-      { c1: "Satoru Gojo", a1: "Jujutsu Kaisen", img1: "https://s4.anilist.co/file/anilistcdn/character/large/b127518-2587Xn7g2uG.png", c2: "Kakashi Hatake", a2: "Naruto", img2: "https://s4.anilist.co/file/anilistcdn/character/large/b1-gDq62YLwPvh.png" },
-      { c1: "Monkey D. Luffy", a1: "One Piece", img1: "https://s4.anilist.co/file/anilistcdn/character/large/b40-gN5U4YhBBt.png", c2: "Naruto Uzumaki", a2: "Naruto", img2: "https://s4.anilist.co/file/anilistcdn/character/large/b17-8zSW2eEF7QY.png" },
-      { c1: "Levi Ackerman", a1: "Attack on Titan", img1: "https://s4.anilist.co/file/anilistcdn/character/large/b45627-5PscIW7WpM3e.png", c2: "Roronoa Zoro", a2: "One Piece", img2: "https://s4.anilist.co/file/anilistcdn/character/large/b62-mP5NOtZYIqV.png" },
-      { c1: "Light Yagami", a1: "Death Note", img1: "https://s4.anilist.co/file/anilistcdn/character/large/b71-rJq8Se3uJ1.png", c2: "L Lawliet", a2: "Death Note", img2: "https://s4.anilist.co/file/anilistcdn/character/large/b73-1q2s3d4fqGh.png" }
-    ];
-
-    const femaleBattles = [
-      { c1: "Yor Forger", a1: "Spy x Family", img1: "https://s4.anilist.co/file/anilistcdn/character/large/b162985-JbL35GgJc0B2.png", c2: "Boa Hancock", a2: "One Piece", img2: "https://s4.anilist.co/file/anilistcdn/character/large/b14945-4DSebsFb6c9d.png" },
-      { c1: "Marin Kitagawa", a1: "My Dress-Up Darling", img1: "https://s4.anilist.co/file/anilistcdn/character/large/b144883-dBYRr7xB5cA.png", c2: "Mai Sakurajima", a2: "Bunny Girl Senpai", img2: "https://s4.anilist.co/file/anilistcdn/character/large/b118739-afb2c3c4e516.png" },
-      { c1: "Hinata Hyuga", a1: "Naruto", img1: "https://s4.anilist.co/file/anilistcdn/character/large/b1555-fk8b0c162e3f.png", c2: "Mikasa Ackerman", a2: "Attack on Titan", img2: "https://s4.anilist.co/file/anilistcdn/character/large/b40882-0f1e2d3c4b5a.png" }
-    ];
-
-    const curMale = maleBattles[dayOfYear % maleBattles.length];
-    const curFemale = femaleBattles[dayOfYear % femaleBattles.length];
-
-    function setupPoll(type, m) {
-      const p = type === 'male' ? 'm' : 'f';
-      document.getElementById(type + '-vs').innerHTML = `
-        <div class="fig-wrap"><img src="${m.img1}" class="fig-img"><div class="fig-name">${m.c1}</div><div class="fig-anime">${m.a1}</div></div>
-        <div style="font-weight:900; color:#f59e0b; font-size:16px;">VS</div>
-        <div class="fig-wrap"><img src="${m.img2}" class="fig-img"><div class="fig-name">${m.c2}</div><div class="fig-anime">${m.a2}</div></div>`;
-      document.getElementById(p + '-btn-1').innerText = `Vote ${m.c1}`;
-      document.getElementById(p + '-btn-2').innerText = `Vote ${m.c2}`;
-
-      const shareTxt = encodeURIComponent(`Vote today: ${m.c1} vs ${m.c2} on AniVortex!\n${window.location.href}`);
-      document.getElementById(p + '-share-wa').onclick = () => window.open(`https://api.whatsapp.com/send?text=${shareTxt}`);
-      document.getElementById(p + '-share-rd').onclick = () => window.open(`https://www.reddit.com/submit?title=${encodeURIComponent(m.c1 + ' vs ' + m.c2)}&url=${encodeURIComponent(window.location.href)}`);
-      renderResults(type);
-    }
-
-    function renderResults(type) {
-      const key = `poll_voted_${type}_${dayOfYear}`;
-      if (localStorage.getItem(key)) {
-        document.getElementById(type + '-btns').style.display = 'none';
-        document.getElementById(type + '-results').style.display = 'block';
-        let v1 = parseInt(localStorage.getItem(`${key}_1`)) || (type === 'male' ? 1420 : 1240);
-        let v2 = parseInt(localStorage.getItem(`${key}_2`)) || (type === 'male' ? 870 : 960);
-        const p1 = Math.round((v1 / (v1 + v2)) * 100);
-        document.getElementById(type + '-bar-1').style.width = p1 + '%';
-        document.getElementById(type + '-bar-2').style.width = (100 - p1) + '%';
-        document.getElementById(type + '-label-1').innerHTML = `${v1.toLocaleString()} Votes <b>(${p1}%)</b>`;
-        document.getElementById(type + '-label-2').innerHTML = `<b>(${100 - p1}%)</b> ${v2.toLocaleString()} Votes`;
-      }
-    }
-
-    window.castVote = function(type, choice) {
-      vibe(50);
-      const k
+    var shareTxt = encodeURIComponent("Vote in today's battle: " + m.c1 + " vs " + m.c2 + " on AniVortex!\n" + window.location.href);
+    var waBtn = document.getElementById(p + '-share-wa');
+    var rdBtn = document.getElementById(p + '-share-rd');
+    if (waBtn) waBtn.onclick = function() { window.open('https://api.whatsapp.com/send?text=' + shareTxt); };
+    if (rdBtn) rdBtn.onclick = function() { window.open('https://www.reddit.com/submit?title=' + encodeURIComponent(m.c1 + ' vs ' + m.c2) + '&url=' + encodeURIComponent(window.locati
