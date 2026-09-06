@@ -86,7 +86,7 @@
     <div class="admin-crown" onclick="openAdminPrompt()"><i class="fa-solid fa-crown"></i></div>
   </header>
 
-  <!-- TAB 1: COMMUNITY (PINNED POSTS + CHAT) -->
+  <!-- TAB 1: COMMUNITY -->
   <section id="sec-community" class="tab-content">
     <div class="chat-shell">
       <div class="chat-msgs" id="chat-stream">
@@ -106,7 +106,7 @@
     </div>
   </section>
 
-  <!-- TAB 2: POLLS (UNDO VOTE SUPPORTED) -->
+  <!-- TAB 2: POLLS -->
   <section id="sec-polls" class="tab-content active">
     <div class="poll-card">
       <div class="poll-badge">
@@ -165,7 +165,7 @@
     <div id="character-list"></div>
   </section>
 
-  <!-- TAB 3: ANIME VAULT (HAREM + 1-10 STAR RATING) -->
+  <!-- TAB 3: ANIME VAULT (HAREM & RATING) -->
   <section id="sec-anime" class="tab-content">
     <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 14px 6px;">
       <h3 style="font-size: 16px; font-weight: 800; color: #fff;"><i class="fa-solid fa-film" style="color: #38bdf8;"></i> Anime Vault</h3>
@@ -244,8 +244,10 @@
 
   window.switchTab = function(t, el) {
     vibe(30);
-    document.querySelectorAll('.tab-content').forEach(s => s.classList.remove('active'));
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    var contents = document.querySelectorAll('.tab-content');
+    for (var i = 0; i < contents.length; i++) contents[i].classList.remove('active');
+    var navs = document.querySelectorAll('.nav-item');
+    for (var j = 0; j < navs.length; j++) navs[j].classList.remove('active');
     document.getElementById('sec-' + t).classList.add('active');
     if (el) el.classList.add('active');
     window.scrollTo(0, 0);
@@ -255,8 +257,7 @@
     var now = new Date();
     var ist = new Date(now.getTime() + (now.getTimezoneOffset() * 60000) + (3600000 * 5.5));
     var start = new Date(ist.getFullYear(), 0, 0);
-    var diff = ist - start;
-    var dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
+    var dayOfYear = Math.floor((ist - start) / (1000 * 60 * 60 * 24));
     var midnight = new Date(ist); midnight.setHours(24, 0, 0, 0);
     return { dayOfYear: dayOfYear, secLeft: Math.max(0, Math.floor((midnight - ist) / 1000)), dateStr: ist.toDateString() };
   }
@@ -275,273 +276,7 @@
     if (document.getElementById('female-timer')) document.getElementById('female-timer').innerText = t;
   }, 1000);
 
-  // Cloudflare/Weserv Global Edge Proxy (Bypasses Indian ISP & MAL 403 blocks)
+  // Direct AniList Cloudflare CDN (Loads 100% in India without proxy blocks)
   var maleBattles = [
-    { c1: "Satoru Gojo", a1: "Jujutsu Kaisen", img1: "https://images.weserv.nl/?url=cdn.myanimelist.net/images/characters/14/428318.jpg", c2: "Kakashi Hatake", a2: "Naruto", img2: "https://images.weserv.nl/?url=cdn.myanimelist.net/images/characters/7/284123.jpg" },
-        { c1: "Monkey D. Luffy", a1: "One Piece", img1: "https://images.weserv.nl/?url=cdn.myanimelist.net/images/characters/9/131317.jpg", c2: "Naruto Uzumaki", a2: "Naruto", img2: "https://images.weserv.nl/?url=cdn.myanimelist.net/images/characters/13/445389.jpg" },
-    { c1: "Levi Ackerman", a1: "Attack on Titan", img1: "https://images.weserv.nl/?url=cdn.myanimelist.net/images/characters/2/274015.jpg", c2: "Roronoa Zoro", a2: "One Piece", img2: "https://images.weserv.nl/?url=cdn.myanimelist.net/images/characters/3/131339.jpg" },
-    { c1: "Light Yagami", a1: "Death Note", img1: "https://images.weserv.nl/?url=cdn.myanimelist.net/images/characters/6/63870.jpg", c2: "L Lawliet", a2: "Death Note", img2: "https://images.weserv.nl/?url=cdn.myanimelist.net/images/characters/10/246413.jpg" }
-  ];
-
-  var femaleBattles = [
-    { c1: "Yor Forger", a1: "Spy x Family", img1: "https://images.weserv.nl/?url=cdn.myanimelist.net/images/characters/13/470438.jpg", c2: "Boa Hancock", a2: "One Piece", img2: "https://images.weserv.nl/?url=cdn.myanimelist.net/images/characters/6/76332.jpg" },
-    { c1: "Marin Kitagawa", a1: "My Dress-Up Darling", img1: "https://images.weserv.nl/?url=cdn.myanimelist.net/images/characters/15/456955.jpg", c2: "Mai Sakurajima", a2: "Bunny Girl Senpai", img2: "https://images.weserv.nl/?url=cdn.myanimelist.net/images/characters/12/367347.jpg" },
-    { c1: "Hinata Hyuga", a1: "Naruto", img1: "https://images.weserv.nl/?url=cdn.myanimelist.net/images/characters/2/73836.jpg", c2: "Mikasa Ackerman", a2: "Attack on Titan", img2: "https://images.weserv.nl/?url=cdn.myanimelist.net/images/characters/9/215563.jpg" }
-  ];
-
-  var curMale = maleBattles[dayOfYear % maleBattles.length];
-  var curFemale = femaleBattles[dayOfYear % femaleBattles.length];
-
-  function renderPoll(type, match) {
-    var p = (type === 'male') ? 'm' : 'f';
-    var vsEl = document.getElementById(type + '-vs');
-    if (vsEl) {
-      vsEl.innerHTML = 
-        '<div class="fig-wrap"><img src="' + match.img1 + '" class="fig-img"><div class="fig-name">' + match.c1 + '</div><div class="fig-anime">' + match.a1 + '</div></div>' +
-        '<div style="font-weight:900; color:#f59e0b; font-size:18px;">VS</div>' +
-        '<div class="fig-wrap"><img src="' + match.img2 + '" class="fig-img"><div class="fig-name">' + match.c2 + '</div><div class="fig-anime">' + match.a2 + '</div></div>';
-    }
-    document.getElementById(p + '-btn-1').innerText = "Vote " + match.c1;
-    document.getElementById(p + '-btn-2').innerText = "Vote " + match.c2;
-    var shareTxt = encodeURIComponent("Vote today: " + match.c1 + " vs " + match.c2 + " on AniVortex!\n" + window.location.href);
-    document.getElementById(p + '-share-wa').onclick = () => window.open('https://api.whatsapp.com/send?text=' + shareTxt);
-    document.getElementById(p + '-share-rd').onclick = () => window.open('https://www.reddit.com/submit?title=' + encodeURIComponent(match.c1 + ' vs ' + match.c2) + '&url=' + encodeURIComponent(window.location.href));
-    checkPollStatus(type);
-  }
-
-  function checkPollStatus(type) {
-    var key = "voted_battle_" + type + "_" + dayOfYear;
-    var userChoice = localStorage.getItem(key);
-    var btns = document.getElementById(type + '-btns');
-    var res = document.getElementById(type + '-results');
-    if (userChoice) {
-      btns.style.display = 'none';
-      res.style.display = 'block';
-      var v1 = parseInt(localStorage.getItem(key + "_1")) || (type === 'male' ? 1421 : 1240);
-      var v2 = parseInt(localStorage.getItem(key + "_2")) || (type === 'male' ? 871 : 960);
-      var p1 = Math.round((v1 / (v1 + v2)) * 100);
-      document.getElementById(type + '-bar-1').style.width = p1 + '%';
-      document.getElementById(type + '-bar-2').style.width = (100 - p1) + '%';
-      document.getElementById(type + '-label-1').innerHTML = v1.toLocaleString() + " Votes <b>(" + p1 + "%)</b>";
-      document.getElementById(type + '-label-2').innerHTML = "<b>(" + (100 - p1) + "%)</b> " + v2.toLocaleString() + " Votes";
-    } else {
-      btns.style.display = 'flex';
-      res.style.display = 'none';
-    }
-  }
-
-  window.castVote = function(type, choice) {
-    vibe(50);
-    var key = "voted_battle_" + type + "_" + dayOfYear;
-    if (localStorage.getItem(key)) return;
-    localStorage.setItem(key, choice);
-    var cKey = key + "_" + choice;
-    var cur = parseInt(localStorage.getItem(cKey)) || (type === 'male' ? (choice === 1 ? 1421 : 871) : (choice === 1 ? 1240 : 960));
-    localStorage.setItem(cKey, cur + 1);
-    checkPollStatus(type);
-  };
-
-  window.undoVote = function(type) {
-    vibe(40);
-    var key = "voted_battle_" + type + "_" + dayOfYear;
-    var prev = localStorage.getItem(key);
-    if (!prev) return;
-    var cKey = key + "_" + prev;
-    var cur = parseInt(localStorage.getItem(cKey)) || 1;
-    localStorage.setItem(cKey, Math.max(0, cur - 1));
-    localStorage.removeItem(key);
-    checkPollStatus(type);
-  };
-
-  // 20 Characters with Full Undo
-  var characters = [
-    { id: 1, name: "Levi Ackerman", anime: "Attack on Titan", pts: 43142, img: "https://images.weserv.nl/?url=cdn.myanimelist.net/images/characters/2/274015.jpg" },
-    { id: 2, name: "Satoru Gojo", anime: "JUJUTSU KAISEN", pts: 41742, img: "https://images.weserv.nl/?url=cdn.myanimelist.net/images/characters/14/428318.jpg" },
-    { id: 3, name: "Killua Zoldyck", anime: "Hunter x Hunter", pts: 37784, img: "https://images.weserv.nl/?url=cdn.myanimelist.net/images/characters/2/327920.jpg" },
-    { id: 4, name: "Monkey D. Luffy", anime: "One Piece", pts: 36412, img: "https://images.weserv.nl/?url=cdn.myanimelist.net/images/characters/9/131317.jpg" },
-    { id: 5, name: "Eren Yeager", anime: "Attack on Titan", pts: 34180, img: "https://images.weserv.nl/?url=cdn.myanimelist.net/images/characters/10/386835.jpg" },
-    { id: 6, name: "L Lawliet", anime: "Death Note", pts: 33920, img: "https://images.weserv.nl/?url=cdn.myanimelist.net/images/characters/10/246413.jpg" },
-    { id: 7, name: "Lelouch Lamperouge", anime: "Code Geass", pts: 32450, img: "https://images.weserv.nl/?url=cdn.myanimelist.net/images/characters/8/406163.jpg" },
-    { id: 8, name: "Roronoa Zoro", anime: "One Piece", pts: 31800, img: "https://images.weserv.nl/?url=cdn.myanimelist.net/images/characters/3/131339.jpg" },
-    { id: 9, name: "Rimuru Tempest", anime: "Slime Isekai", pts: 29540, img: "https://images.weserv.nl/?url=cdn.myanimelist.net/images/characters/15/369796.jpg" },
-    { id: 10, name: "Mikasa Ackerman", anime: "Attack on Titan", pts: 28910, img: "https://images.weserv.nl/?url=cdn.myanimelist.net/images/characters/9/215563.jpg" },
-    { id: 11, name: "Kurapika", anime: "Hunter x Hunter", pts: 27400, img: "https://images.weserv.nl/?url=cdn.myanimelist.net/images/characters/8/193231.jpg" },
-    { id: 12, name: "Guts", anime: "Berserk", pts: 25120, img: "https://images.weserv.nl/?url=cdn.myanimelist.net/images/characters/15/73177.jpg" },
-    { id: 13, name: "Itachi Uchiha", anime: "Naruto", pts: 24850, img: "https://images.weserv.nl/?url=cdn.myanimelist.net/images/characters/16/307409.jpg" },
-    { id: 14, name: "Ken Kaneki", anime: "Tokyo Ghoul", pts: 23900, img: "https://images.weserv.nl/?url=cdn.myanimelist.net/images/characters/7/262791.jpg" },
-    { id: 15, name: "Makima", anime: "Chainsaw Man", pts: 22400, img: "https://images.weserv.nl/?url=cdn.myanimelist.net/images/characters/16/487920.jpg" },
-    { id: 16, name: "Tanjiro Kamado", anime: "Demon Slayer", pts: 21700, img: "https://images.weserv.nl/?url=cdn.myanimelist.net/images/characters/14/386034.jpg" },
-    { id: 17, name: "Kakashi Hatake", anime: "Naruto", pts: 20950, img: "https://images.weserv.nl/?url=cdn.myanimelist.net/images/characters/7/284123.jpg" },
-    { id: 18, name: "Yuji Itadori", anime: "JUJUTSU KAISEN", pts: 19800, img: "https://images.weserv.nl/?url=cdn.myanimelist.net/images/characters/9/422168.jpg" },
-    { id: 19, name: "Mai Sakurajima", anime: "Bunny Girl Senpai", pts: 18650, img: "https://images.weserv.nl/?url=cdn.myanimelist.net/images/characters/12/367347.jpg" },
-    { id: 20, name: "Marin Kitagawa", anime: "My Dress-Up Darling", pts: 17900, img: "https://images.weserv.nl/?url=cdn.myanimelist.net/images/characters/15/456955.jpg" }
-  ];
-
-  window.voteChar = function(id, delta, btn) {
-    vibe(40);
-    var lockKey = "voted_char_" + id + "_" + dateStr;
-    if (localStorage.getItem(lockKey)) return alert("You already voted for this character today!");
-    localStorage.setItem(lockKey, delta > 0 ? "promote" : "demote");
-    var c = characters.find(x => x.id === id);
-    if (c) c.pts += delta;
-    var card = btn.closest('.char-card');
-    if (card) {
-      var fl = document.createElement('span');
-      fl.className = 'floater';
-      fl.innerText = (delta > 0) ? '+1' : '-1';
-      fl.style.color = (delta > 0) ? '#34d399' : '#ef4444';
-      card.appendChild(fl);
-      setTimeout(() => fl.remove(), 700);
-    }
-    characters.sort((a, b) => b.pts - a.pts);
-    filterCharacters();
-  };
-
-  window.undoCharVote = function(id) {
-    vibe(40);
-    var lockKey = "voted_char_" + id + "_" + dateStr;
-    var prev = localStorage.getItem(lockKey);
-    if (!prev) return;
-    var c = characters.find(x => x.id === id);
-    if (c) c.pts += (prev === "promote" ? -1 : 1);
-    localStorage.removeItem(lockKey);
-    characters.sort((a, b) => b.pts - a.pts);
-    filterCharacters();
-  };
-
-  window.filterCharacters = function() {
-    var q = (document.getElementById('char-search')?.value || '').toLowerCase();
-    document.getElementById('character-list').innerHTML = characters
-      .filter(c => c.name.toLowerCase().includes(q) || c.anime.toLowerCase().includes(q))
-      .map(c => {
-        var voted = localStorage.getItem("voted_char_" + c.id + "_" + dateStr);
-        return `<div class="char-card">
-          <img src="${c.img}" class="char-img">
-          <div class="char-info">
-            <div class="char-name">${c.name}</div>
-            <div class="char-anime">${c.anime}</div>
-            <div class="char-pts">★ ${c.pts.toLocaleString()} Points</div>
-          </div>
-          <div class="rank-btns">
-            ${voted ? `
-              <span class="voted-badge">${voted === 'promote' ? '▲ Promoted' : '▼ Demoted'}</span>
-              <button class="undo-rank-btn" onclick="undoCharVote(${c.id})"><i class="fa-solid fa-rotate-left"></i> Undo</button>
-            ` : `
-              <button class="rank-btn btn-promote" onclick="voteChar(${c.id}, 1, this)">▲ Promote</button>
-              <button class="rank-btn btn-demote" onclick="voteChar(${c.id}, -1, this)">▼ Demote</button>
-            `}
-          </div>
-        </div>`;
-      }).join('');
-  };
-
-  // Anime Vault Data (Harem Included)
-  var vaultData = [
-    { id: 1, title: "The Quintessential Quintuplets", genres: ["Harem", "Romance"], score: "8.2", eps: "24", desc: "A poor tutor is hired to guide five identical quintuplet sisters through high school graduation.", img: "https://images.weserv.nl/?url=cdn.myanimelist.net/images/anime/1792/96384.jpg" },
-    { id: 2, title: "High School DxD", genres: ["Harem", "Supernatural"], score: "7.8", eps: "48", desc: "Issei Hyodo is reincarnated as a devil servant amongst beautiful demon girls.", img: "https://images.weserv.nl/?url=cdn.myanimelist.net/images/anime/11/38843.jpg" },
-    { id: 3, title: "Nisekoi: False Love", genres: ["Harem", "Romance"], score: "7.9", eps: "32", desc: "Two rival yakuza heirs pretend to be in love to stop an all-out gang war.", img: "https://images.weserv.nl/?url=cdn.myanimelist.net/images/anime/13/57991.jpg" },
-    { id: 4, title: "Date A Live", genres: ["Harem", "Supernatural"], score: "7.6", eps: "48", desc: "Shido must seal celestial spirits by making them fall in love with him.", img: "https://images.weserv.nl/?url=cdn.myanimelist.net/images/anime/10/49963.jpg" },
-    { id: 5, title: "To LOVE-Ru", genres: ["Harem", "Comedy"], score: "7.5", eps: "64", desc: "Rito accidentally proposes to an alien princess fleeing an arranged marriage.", img: "https://images.weserv.nl/?url=cdn.myanimelist.net/images/anime/10/75204.jpg" },
-    { id: 6, title: "Attack on Titan", genres: ["Action", "Supernatural"], score: "9.1", eps: "87", desc: "Humanity fights for survival against man-eating giants behind colossal walls.", img: "https://images.weserv.nl/?url=cdn.myanimelist.net/images/anime/10/47347.jpg" },
-    { id: 7, title: "JUJUTSU KAISEN", genres: ["Action", "Supernatural"], score: "8.8", eps: "47", desc: "Yuji Itadori swallows a cursed finger and enters a lethal sorcerer world.", img: "https://images.weserv.nl/?url=cdn.myanimelist.net/images/anime/1171/109222.jpg" },
-    { id: 8, title: "Demon Slayer", genres: ["Action", "Supernatural"], score: "8.9", eps: "55", desc: "Tanjiro fights deadly demons to avenge his family and cure his sister.", img: "https://images.weserv.nl/?url=cdn.myanimelist.net/images/anime/1286/99889.jpg" },
-    { id: 9, title: "One Piece", genres: ["Action", "Adventure"], score: "8.9", eps: "1100+", desc: "Monkey D. Luffy sails the Grand Line in search of the legendary treasure.", img: "https://images.weserv.nl/?url=cdn.myanimelist.net/images/anime/6/73245.jpg" },
-    { id: 10, title: "Solo Leveling", genres: ["Action", "Fantasy"], score: "8.6", eps: "12", desc: "The weakest hunter awakens a secret system to level up infinitely.", img: "https://images.weserv.nl/?url=cdn.myanimelist.net/images/anime/1970/141065.jpg" }
-  ];
-
-  var curAnime = null;
-  function renderVault(list) {
-    document.getElementById('anime-grid').innerHTML = list.map(a => `
-      <div class="anime-card" onclick="openModal(${a.id})">
-        <img src="${a.img}" class="anime-poster">
-        <div class="anime-detail">
-          <div class="anime-title">${a.title}</div>
-          <div style="font-size:11px;color:#f59e0b;margin-top:2px;">★ ${a.score} • ${a.genres[0]}</div>
-        </div>
-      </div>`).join('');
-  }
-
-  window.loadGenre = function(g, el) {
-    vibe(30);
-    document.querySelectorAll('.genre-chip').forEach(c => c.classList.remove('active'));
-    el.classList.add('active');
-    renderVault(g === 'all' ? vaultData : vaultData.filter(a => a.genres.some(x => x.toLowerCase() === g.toLowerCase())));
-  };
-
-  window.searchVault = function() {
-    var q = document.getElementById('vault-search').value.toLowerCase().trim();
-    renderVault(vaultData.filter(a => a.title.toLowerCase().includes(q)));
-  };
-
-  window.openModal = function(id) {
-    vibe(40);
-    curAnime = vaultData.find(a => a.id === id);
-    if (!curAnime) return;
-    document.getElementById('m-poster').src = curAnime.img;
-    document.getElementById('m-title').innerText = curAnime.title;
-    document.getElementById('m-meta').innerText = "★ " + curAnime.score + " | Eps: " + curAnime.eps + " | " + curAnime.genres.join(', ');
-    document.getElementById('m-synopsis').innerText = curAnime.desc;
-    buildStarBar(parseInt(localStorage.getItem('user_rated_' + curAnime.id)) || 0);
-    document.getElementById('anime-modal').style.display = 'flex';
-  };
-
-  function buildStarBar(r) {
-    document.getElementById('star-bar').innerHTML = [1,2,3,4,5,6,7,8,9,10].map(s => `<i class="fa-solid fa-star rate-star ${s <= r ? 'active':''}" onclick="rateAnime(${s})"></i>`).join('');
-    document.getElementById('user-rating-status').innerText = r > 0 ? `Your Rating: ${r}/10 ★` : 'Not rated yet';
-  }
-
-  window.rateAnime = function(s) {
-    vibe(40);
-    if (curAnime) { localStorage.setItem('user_rated_' + curAnime.id, s); buildStarBar(s); }
-  };
-  window.closeModal = () => document.getElementById('anime-modal').style.display = 'none';
-  window.surpriseAnime = () => { vibe(60); openModal(vaultData[Math.floor(Math.random() * vaultData.length)].id); };
-
-  // Community Chat
-  document.getElementById('chat-send-btn').onclick = function() {
-    var inp = document.getElementById('chat-input');
-    if (!inp.value.trim()) return;
-    vibe(30);
-    var b = document.createElement('div');
-    b.className = 'chat-bubble';
-    b.style.cssText = 'align-self: flex-end; background: #1e3a8a;';
-    b.innerHTML = '<div style="font-size:11px;font-weight:700;color:#93c5fd;">You</div><div style="font-size:13px;color:#fff;">' + inp.value + '</div>';
-    document.getElementById('chat-stream').appendChild(b);
-    inp.value = '';
-  };
-
-  // Admin PIN: 66666660 (Seven 6s + 0)
-  window.openAdminPrompt = function() {
-    vibe(40);
-    if (prompt("Enter Admin Security PIN:") === "66666660") {
-      document.getElementById('admin-modal').style.display = 'flex';
-      document.getElementById('admin-status').innerText = "Logged in as Admin";
-    } else alert("Incorrect PIN!");
-  };
-  window.closeAdminModal = () => document.getElementById('admin-modal').style.display = 'none';
-  window.adminResetPolls = function() {
-    localStorage.removeItem("voted_battle_male_" + dayOfYear);
-    localStorage.removeItem("voted_battle_female_" + dayOfYear);
-    checkPollStatus('male'); checkPollStatus('female');
-    document.getElementById('admin-status').innerText = "✅ Polls reset!";
-  };
-  window.adminResetCharLimits = function() {
-    characters.forEach(c => localStorage.removeItem("voted_char_" + c.id + "_" + dateStr));
-    filterCharacters();
-    document.getElementById('admin-status').innerText = "✅ Limits unlocked!";
-  };
-  window.adminBoostTopChar = function() {
-    characters[0].pts += 500;
-    characters.sort((a,b) => b.pts - a.pts);
-    filterCharacters();
-    document.getElementById('admin-status').innerText = "✅ +500 points added!";
-  };
-
-  // Boot Application
-  renderPoll('male', curMale);
-  renderPoll('female', curFemale);
-  filterCharacters();
-  renderVault(vaultData);
-  </script>
-</body>
-</html>
+    { c1: "Satoru Gojo", a1: "Jujutsu Kaisen", img1: "https://s4.anilist.co/file/anilistcdn/character/large/b127518-2587Xn7g2uG.png", c2: "Kakashi Hatake", a2: "Naruto", img2: "https://s4.anilist.co/file/anilistcdn/character/large/b1-gDq62YLwPvh.png" },
+    { c1: "Monkey D. 
