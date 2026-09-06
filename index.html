@@ -1839,4 +1839,89 @@ window.addEventListener('DOMContentLoaded', renderDailyBattles);
         
 </body>
 </html>
+<!-- AUTO-INJECTED DAILY POLL (PASTE AT BOTTOM) -->
+<script>
+(function() {
+  function initDailyPoll() {
+    if (document.getElementById('daily-poll-box-ready')) return;
+
+    var battles = [
+      { c1: "Satoru Gojo", a1: "Jujutsu Kaisen", c2: "Kakashi Hatake", a2: "Naruto" },
+      { c1: "Monkey D. Luffy", a1: "One Piece", c2: "Naruto Uzumaki", a2: "Naruto" },
+      { c1: "Levi Ackerman", a1: "Attack on Titan", c2: "Roronoa Zoro", a2: "One Piece" },
+      { c1: "Light Yagami", a1: "Death Note", c2: "L Lawliet", a2: "Death Note" }
+    ];
+
+    var now = new Date();
+    var start = new Date(now.getFullYear(), 0, 0);
+    var dayOfYear = Math.floor((now - start) / (1000 * 60 * 60 * 24));
+    var today = battles[dayOfYear % battles.length];
+
+    // Card UI Element
+    var pollCard = document.createElement('div');
+    pollCard.id = 'daily-poll-box-ready';
+    pollCard.style.cssText = 'margin: 16px 12px; background: #161f30; border: 1px solid #2e3d55; border-radius: 12px; padding: 16px; text-align: center; font-family: sans-serif; box-shadow: 0 4px 14px rgba(0,0,0,0.5);';
+
+    pollCard.innerHTML = 
+      '<div style="font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: #38bdf8; font-weight: bold; margin-bottom: 6px;">⚡ TODAY\'S DAILY BATTLE</div>' +
+      '<div style="font-size: 16px; font-weight: bold; color: #ffffff; margin-bottom: 14px;">' +
+        today.c1 + ' <span style="color:#94a3b8;font-size:12px;">(' + today.a1 + ')</span> <span style="color:#f59e0b;">VS</span> ' + today.c2 + ' <span style="color:#94a3b8;font-size:12px;">(' + today.a2 + ')</span>' +
+      '</div>' +
+      '<div style="display: flex; gap: 10px; justify-content: center;">' +
+        '<button id="dp-vote-1" style="flex: 1; background: #2563eb; color: #ffffff; border: none; padding: 12px 6px; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer;">Vote ' + today.c1 + '</button>' +
+        '<button id="dp-vote-2" style="flex: 1; background: #dc2626; color: #ffffff; border: none; padding: 12px 6px; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer;">Vote ' + today.c2 + '</button>' +
+      '</div>' +
+      '<div id="dp-vote-msg" style="margin-top: 10px; font-size: 13px; color: #4ade80; min-height: 18px;"></div>';
+
+    // Auto-locate position on page
+    var target = null;
+    var all = document.querySelectorAll('div, p, span, h1, h2, h3, h4');
+    for (var i = 0; i < all.length; i++) {
+      if (all[i].innerText && (all[i].innerText.includes('BEAUTY SHOWDOWN') || all[i].innerText.includes('BEAUTIFUL'))) {
+        target = all[i];
+        break;
+      }
+    }
+
+    if (target && target.parentNode) {
+      target.parentNode.insertBefore(pollCard, target.nextSibling);
+    } else {
+      document.body.appendChild(pollCard);
+    }
+
+    // Vote Logic
+    var b1 = document.getElementById('dp-vote-1');
+    var b2 = document.getElementById('dp-vote-2');
+    var msg = document.getElementById('dp-vote-msg');
+    var key = "voted_day_" + dayOfYear;
+    var done = localStorage.getItem(key);
+
+    function lockButtons(name) {
+      b1.disabled = true;
+      b2.disabled = true;
+      b1.style.opacity = '0.5';
+      b2.style.opacity = '0.5';
+      msg.innerHTML = '✅ You voted for <b>' + name + '</b>!';
+    }
+
+    if (done) lockButtons(done);
+
+    b1.onclick = function() {
+      localStorage.setItem(key, today.c1);
+      lockButtons(today.c1);
+    };
+    b2.onclick = function() {
+      localStorage.setItem(key, today.c2);
+      lockButtons(today.c2);
+    };
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initDailyPoll);
+  } else {
+    initDailyPoll();
+  }
+})();
+</script>
+
 
