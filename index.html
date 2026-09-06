@@ -1379,7 +1379,8 @@
 
                     const card = document.createElement("div");
                     card.className = "anime-card";
-                    card.onclick = () => openAnimeModal(anime.id);
+                    card.onclick = () => openAnimeDetailModal(anime.id, title, (anime.seasonYear || anime.format || 'Anime'), (anime.genres || []), score);
+                    
                     card.innerHTML = `
                         <img class="anime-poster" src="${anime.coverImage.large}" alt="${escapeHtml(title)}" loading="lazy" referrerpolicy="no-referrer">
                         <div class="anime-card-content">
@@ -1464,7 +1465,7 @@
         `;
 
         try {
-            const res = await fetch("https://graphql.anilist.co", {
+            const res = await fetch("https://calm-tarsier-2146.lightyagami00001010-coder.deno.net", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ query, variables: { id } })
