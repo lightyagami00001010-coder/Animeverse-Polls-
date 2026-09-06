@@ -1,1927 +1,495 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="referrer" content="no-referrer">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AniVortex</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: #0b0f19; color: #f8fafc; padding-bottom: 75px; -webkit-tap-highlight-color: transparent; }
     
-    <title>AniVortex — the world you belong to.</title>
+    /* Top Header */
+    header { background: #111827; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1f2937; position: sticky; top: 0; z-index: 50; }
+    .brand { display: flex; align-items: center; gap: 8px; }
+    .brand-title { font-size: 19px; font-weight: 800; color: #38bdf8; letter-spacing: 0.5px; }
+    .brand-sub { font-size: 11px; color: #94a3b8; margin-top: 1px; }
+
+    /* Tabs Logic */
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* Bottom Nav */
+    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 60px; background: #111827; border-top: 1px solid #1f2937; display: flex; justify-content: space-around; align-items: center; z-index: 100; }
+    .nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; color: #64748b; font-size: 11px; cursor: pointer; text-decoration: none; border: none; background: none; flex: 1; }
+    .nav-item i { font-size: 17px; }
+    .nav-item.active { color: #38bdf8; font-weight: bold; }
+
+    /* Daily Poll Cards */
+    .poll-card { background: #161f30; border: 1px solid #23324a; border-radius: 14px; padding: 16px; margin: 14px 12px; box-shadow: 0 4px 14px rgba(0,0,0,0.4); }
+    .poll-badge { display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 10px; }
+    .timer-pill { background: #0f172a; padding: 3px 8px; border-radius: 20px; color: #f59e0b; border: 1px solid #334155; font-size: 10px; font-family: monospace; }
+    .poll-title { font-size: 16px; font-weight: 700; text-align: center; margin: 10px 0 16px; color: #ffffff; }
+    .btn-grid { display: flex; gap: 10px; }
+    .vote-btn { flex: 1; border: none; padding: 12px 6px; border-radius: 10px; font-weight: 700; font-size: 13px; color: #fff; cursor: pointer; transition: transform 0.1s; }
+    .vote-btn:active { transform: scale(0.96); }
+    .btn-male-1 { background: #2563eb; }
+    .btn-male-2 { background: #dc2626; }
+    .btn-female-1 { background: #db2777; }
+    .btn-female-2 { background: #7c3aed; }
     
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%23040508' rx='90'/%3E%3Cg filter='drop-shadow(0 0 15px %2300f0ff)'%3E%3Cpath d='M60 330 C120 70 340 90 440 240 C420 380 250 420 180 340 C140 290 190 190 280 210' fill='none' stroke='%2300f0ff' stroke-width='28' stroke-linecap='round'/%3E%3C/g%3E%3Cpolygon points='256,60 140,260 256,450 230,260' fill='%232a334a' stroke='%23384566' stroke-width='2'/%3E%3Cpolygon points='256,60 372,260 256,450 282,260' fill='%23141a26' stroke='%23222b3d' stroke-width='2'/%3E%3Cline x1='256' y1='60' x2='140' y2='260' stroke='%23ffffff' stroke-width='4'/%3E%3Cpolygon points='256,230 264,252 286,256 266,268 272,290 256,276 240,290 246,268 226,256 248,252' fill='%23ffffff'/%3E%3C/svg%3E">
-        <!-- Social Preview Tags -->
-    <meta property="og:type" content="website" />
-    <meta property="og:title" content="AniVortex - Anime Polls & Vault" />
-    <meta property="og:description" content="Vote for your favorite anime characters and explore top-rated anime!" />
-    <meta property="og:image" content="https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx16498-C6FPmWm59CyP.jpg" />
-    <meta name="twitter:card" content="summary_large_image" />
-    
-
-    <style>
-        :root {
-            --bg-base: #06080d;
-            --bg-surface: #0c1017;
-            --bg-card: #131923;
-            --accent-cyan: #00f0ff;
-            --accent-purple: #9d4edd;
-            --accent-red: #ff2a5f;
-            --accent-gold: #ffb703;
-            --text-primary: #f0f6fc;
-            --text-secondary: #8b949e;
-            --border: #1c2433;
-            --bottom-nav-height: 64px;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            background-color: var(--bg-base);
-            color: var(--text-primary);
-            overflow-x: hidden;
-            padding-bottom: calc(var(--bottom-nav-height) + 24px);
-        }
-
-        header {
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            background: rgba(6, 8, 13, 0.92);
-            backdrop-filter: blur(14px);
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 10px 16px;
-        }
-
-        .header-left, .header-right {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .icon-btn {
-            background: none;
-            border: none;
-            color: var(--text-primary);
-            font-size: 1.35rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .brand-box {
-            display: flex;
-            flex-direction: column;
-            cursor: pointer;
-            user-select: none;
-        }
-
-        .brand-title {
-            display: flex;
-            align-items: center;
-            gap: 7px;
-            font-size: 1.18rem;
-            font-weight: 800;
-            letter-spacing: 0.5px;
-            color: #ffffff;
-        }
-
-        .brand-logo-svg {
-            width: 22px;
-            height: 22px;
-        }
-
-        .brand-slogan {
-            font-size: 11px;
-            color: var(--text-secondary);
-            font-weight: 400;
-            letter-spacing: 0.3px;
-            margin-top: -1px;
-        }
-
-        .user-avatar-badge {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: var(--bg-card);
-            border: 1.5px solid var(--accent-cyan);
-            object-fit: cover;
-            cursor: pointer;
-        }
-
-        .admin-badge {
-            display: none;
-            background: var(--accent-red);
-            color: #fff;
-            font-size: 9px;
-            font-weight: 800;
-            padding: 2px 6px;
-            border-radius: 4px;
-            margin-left: 6px;
-        }
-
-        .admin-badge.active {
-            display: inline-block;
-        }
-
-        .drawer-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.75);
-            z-index: 200;
-            opacity: 0;
-            pointer-events: none;
-            transition: 0.25s ease;
-        }
-
-        .drawer-overlay.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .drawer {
-            position: fixed;
-            top: 0;
-            left: -280px;
-            width: 280px;
-            height: 100%;
-            background: var(--bg-surface);
-            z-index: 201;
-            border-right: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            padding: 24px 18px;
-            transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .drawer.active {
-            left: 0;
-        }
-
-        .drawer-header {
-            font-size: 1.15rem;
-            font-weight: 700;
-            margin-bottom: 24px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .drawer-menu {
-            list-style: none;
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-        }
-
-        .drawer-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 0.92rem;
-            color: var(--text-primary);
-            cursor: pointer;
-            padding: 10px 12px;
-            border-radius: 8px;
-            transition: 0.15s;
-        }
-
-        .drawer-item:active {
-            background: var(--bg-card);
-        }
-
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: var(--bottom-nav-height);
-            background: rgba(12, 16, 23, 0.96);
-            backdrop-filter: blur(14px);
-            border-top: 1px solid var(--border);
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            z-index: 100;
-        }
-
-        .nav-tab {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            font-size: 10px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .nav-tab .tab-icon {
-            font-size: 1.25rem;
-            transition: 0.2s;
-        }
-
-        .nav-tab.active {
-            color: var(--accent-cyan);
-        }
-
-        .nav-tab.active .tab-icon {
-            transform: scale(1.15);
-        }
-
-        .tab-view {
-            display: none;
-            padding: 16px;
-            max-width: 720px;
-            margin: 0 auto;
-            animation: fadeIn 0.2s ease-in-out;
-        }
-
-        .tab-view.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(4px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .view-title {
-            font-size: 1.22rem;
-            font-weight: 800;
-            margin-bottom: 14px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .chat-container {
-            display: flex;
-            flex-direction: column;
-            height: calc(100vh - 170px);
-            background: var(--bg-surface);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            overflow: hidden;
-        }
-
-        .chat-messages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 14px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .chat-bubble {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            padding: 10px 14px;
-            border-radius: 12px;
-            max-width: 85%;
-            align-self: flex-start;
-        }
-
-        .chat-bubble.mine {
-            align-self: flex-end;
-            background: #0f2433;
-            border-color: #174259;
-        }
-
-        .chat-user-row {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 11px;
-            font-weight: 700;
-            color: var(--accent-cyan);
-            margin-bottom: 4px;
-        }
-
-        .chat-text {
-            font-size: 0.9rem;
-            line-height: 1.4;
-            word-break: break-word;
-        }
-
-        .chat-time {
-            font-size: 9px;
-            color: var(--text-secondary);
-            text-align: right;
-            margin-top: 4px;
-        }
-
-        .chat-input-bar {
-            padding: 10px;
-            background: var(--bg-surface);
-            border-top: 1px solid var(--border);
-            display: flex;
-            gap: 8px;
-        }
-
-        .chat-input {
-            flex: 1;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 10px 16px;
-            color: #fff;
-            font-size: 0.9rem;
-            outline: none;
-        }
-
-        .chat-send-btn {
-            background: var(--accent-cyan);
-            border: none;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            color: #000;
-            font-weight: 700;
-        }
-
-        .char-card {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            background: var(--bg-surface);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 12px;
-            margin-bottom: 12px;
-        }
-
-        .char-img {
-            width: 62px;
-            height: 82px;
-            border-radius: 8px;
-            object-fit: cover;
-            background: var(--bg-card);
-        }
-
-        .char-info {
-            flex: 1;
-        }
-
-        .char-name {
-            font-size: 1rem;
-            font-weight: 700;
-            margin-bottom: 2px;
-        }
-
-        .char-anime {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            margin-bottom: 6px;
-        }
-
-        .char-score {
-            font-size: 0.85rem;
-            font-weight: 800;
-            color: var(--accent-gold);
-        }
-
-        .vote-actions {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .vote-btn {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            color: var(--text-primary);
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-size: 0.8rem;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            cursor: pointer;
-            transition: 0.15s;
-        }
-
-        .vote-btn.promoted {
-            background: rgba(0, 240, 255, 0.15);
-            border-color: var(--accent-cyan);
-            color: var(--accent-cyan);
-        }
-
-        .vote-btn.demoted {
-            background: rgba(255, 42, 95, 0.15);
-            border-color: var(--accent-red);
-            color: var(--accent-red);
-        }
-
-        .genre-chips-container {
-            display: flex;
-            gap: 8px;
-            overflow-x: auto;
-            padding-bottom: 12px;
-            margin-bottom: 14px;
-            scrollbar-width: none;
-        }
-
-        .genre-chips-container::-webkit-scrollbar {
-            display: none;
-        }
-
-        .genre-chip {
-            padding: 7px 14px;
-            background: var(--bg-surface);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            white-space: nowrap;
-            color: var(--text-secondary);
-            cursor: pointer;
-        }
-
-        .genre-chip.active {
-            background: var(--accent-cyan);
-            color: #000;
-            border-color: var(--accent-cyan);
-        }
-
-        .anime-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-        }
-
-        .anime-card {
-            background: var(--bg-surface);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            overflow: hidden;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .anime-poster {
-            width: 100%;
-            aspect-ratio: 2/3;
-            object-fit: cover;
-            background: var(--bg-card);
-        }
-
-        .anime-card-content {
-            padding: 10px;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-
-        .anime-card-title {
-            font-size: 0.9rem;
-            font-weight: 700;
-            line-height: 1.3;
-            margin-bottom: 6px;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        .anime-card-rating {
-            font-size: 0.8rem;
-            color: var(--accent-gold);
-            font-weight: 700;
-        }
-
-        .bday-banner {
-            background: linear-gradient(135deg, #240d1c, var(--bg-surface));
-            border: 1px solid var(--accent-red);
-            border-radius: 12px;
-            padding: 14px;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            margin-bottom: 16px;
-        }
-
-        .bday-img {
-            width: 55px;
-            height: 55px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid var(--accent-red);
-        }
-
-        .bday-info h4 {
-            font-size: 0.95rem;
-            color: #fff;
-            margin-bottom: 2px;
-        }
-
-        .bday-info p {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-        }
-
-        .updates-feed {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .update-card {
-            background: var(--bg-surface);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            overflow: hidden;
-        }
-
-        .update-poster {
-            width: 100%;
-            height: 190px;
-            object-fit: cover;
-        }
-
-        .update-details {
-            padding: 12px;
-        }
-
-        .update-tag {
-            display: inline-block;
-            font-size: 10px;
-            font-weight: 700;
-            padding: 3px 8px;
-            border-radius: 4px;
-            background: rgba(0, 240, 255, 0.15);
-            color: var(--accent-cyan);
-            margin-bottom: 6px;
-        }
-
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            z-index: 300;
-            display: none;
-            align-items: flex-end;
-        }
-
-        .modal.active {
-            display: flex;
-        }
-
-        .modal-sheet {
-            background: var(--bg-surface);
-            width: 100%;
-            max-height: 88vh;
-            border-radius: 20px 20px 0 0;
-            border-top: 1px solid var(--border);
-            overflow-y: auto;
-            padding: 20px 18px 40px;
-            animation: slideUp 0.25s ease-out;
-        }
-
-        @keyframes slideUp {
-            from { transform: translateY(100%); }
-            to { transform: translateY(0); }
-        }
-
-        .modal-close {
-            float: right;
-            font-size: 1.5rem;
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            cursor: pointer;
-        }
-
-        .star-rating-bar {
-            display: flex;
-            gap: 4px;
-            margin: 10px 0 6px;
-            font-size: 1.35rem;
-            cursor: pointer;
-        }
-
-        .star-rating-bar span {
-            color: #2b3342;
-            transition: 0.15s;
-        }
-
-        .star-rating-bar span.active {
-            color: var(--accent-gold);
-        }
-
-        .cast-scroll {
-            display: flex;
-            gap: 12px;
-            overflow-x: auto;
-            padding: 8px 0;
-        }
-
-        .cast-item {
-            min-width: 75px;
-            text-align: center;
-        }
-
-        .cast-img {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 1px solid var(--border);
-            margin-bottom: 4px;
-        }
-
-        .cast-name {
-            font-size: 11px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .watch-badges {
-            display: flex;
-            gap: 8px;
-            margin-top: 8px;
-            flex-wrap: wrap;
-        }
-
-        .watch-badge {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            color: var(--accent-cyan);
-            text-decoration: none;
-        }
-
-        .mod-del-btn {
-            background: none;
-            border: none;
-            color: var(--accent-red);
-            font-size: 11px;
-            margin-left: 8px;
-            cursor: pointer;
-            .daily-battle-box {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.battle-fighters {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.fighter-card {
-  flex: 1;
-  text-align: center;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 10px;
-  padding: 8px;
-  cursor: pointer;
-  transition: transform 0.2s ease, border-color 0.2s ease;
-}
-
-.fighter-card:active {
-  transform: scale(0.96);
-}
-
-.fighter-img {
-  width: 100%;
-  height: 150px;
-  object-fit: cover;
-  border-radius: 8px;
-}
-
-.fighter-name {
-  font-size: 0.85rem;
-  font-weight: 700;
-  margin-top: 6px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.fighter-anime {
-  font-size: 0.7rem;
-  color: var(--text-secondary);
-}
-
-.vs-badge {
-  font-weight: 900;
-  font-size: 0.85rem;
-  color: var(--accent-red);
-  padding: 6px;
-}
-
-.poll-results-bar {
-  display: flex;
-  height: 8px;
-  border-radius: 4px;
-  overflow: hidden;
-  background: #222;
-  margin-top: 4px;
-}
-
-.bar-left { background: var(--accent-cyan); height: 100%; }
-.bar-right { background: #ff77a9; height: 100%; }
-            
-        }
-    </style>
-    </head>
-    <body>
-
-    <div class="drawer-overlay" id="drawerOverlay" onclick="toggleDrawer()"></div>
-    <div class="drawer" id="sideDrawer">
-        <div class="drawer-header">
-            <span>AniVortex Menu</span>
-            <button class="icon-btn" onclick="toggleDrawer()">✕</button>
+    /* Dual Results Bar (Numbers + Percentage) */
+    .results-box { display: none; margin-top: 14px; }
+    .bar-shell { height: 26px; background: #0f172a; border-radius: 8px; overflow: hidden; display: flex; position: relative; border: 1px solid #334155; }
+    .bar-fill-1 { height: 100%; transition: width 0.6s ease; display: flex; align-items: center; padding-left: 8px; font-size: 11px; font-weight: bold; }
+    .bar-fill-2 { height: 100%; transition: width 0.6s ease; display: flex; align-items: center; justify-content: flex-end; padding-right: 8px; font-size: 11px; font-weight: bold; }
+    .stats-label { display: flex; justify-content: space-between; font-size: 12px; margin-top: 6px; font-weight: 600; color: #cbd5e1; }
+
+    /* Share Buttons */
+    .share-tray { display: flex; gap: 8px; margin-top: 14px; padding-top: 12px; border-top: 1px solid #23324a; }
+    .share-btn { flex: 1; padding: 7px 0; border-radius: 6px; font-size: 12px; font-weight: 600; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; color: #fff; text-decoration: none; }
+    .share-wa { background: #16a34a; }
+    .share-rd { background: #ea580c; }
+
+    /* Character Ranking */
+    .search-box-wrap { padding: 0 12px; margin: 14px 0 10px; }
+    .search-input { width: 100%; background: #111827; border: 1px solid #1f2937; padding: 11px 14px; border-radius: 10px; color: #fff; font-size: 13px; outline: none; }
+    .char-card { background: #111827; border: 1px solid #1f2937; border-radius: 12px; padding: 12px; margin: 8px 12px; display: flex; align-items: center; gap: 12px; position: relative; }
+    .char-img { width: 52px; height: 52px; border-radius: 10px; object-fit: cover; }
+    .char-info { flex: 1; }
+    .char-name { font-weight: 700; font-size: 14px; color: #f8fafc; }
+    .char-anime { font-size: 11px; color: #94a3b8; }
+    .char-pts { font-size: 12px; color: #f59e0b; font-weight: 600; margin-top: 3px; }
+    .rank-btns { display: flex; flex-direction: column; gap: 4px; }
+    .rank-btn { padding: 5px 9px; border-radius: 6px; border: none; font-size: 10px; font-weight: 700; cursor: pointer; color: white; display: flex; align-items: center; gap: 3px; }
+    .btn-promote { background: #d97706; }
+    .btn-demote { background: #b45309; }
+
+    /* Floating +1 / -1 Animation */
+    .floater { position: absolute; right: 20px; font-weight: 800; font-size: 14px; pointer-events: none; animation: floatAnim 0.7s ease-out forwards; }
+    @keyframes floatAnim { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-24px); } }
+
+    /* Anime Vault & Genres */
+    .genre-row { display: flex; gap: 8px; overflow-x: auto; padding: 6px 12px; scrollbar-width: none; }
+    .genre-row::-webkit-scrollbar { display: none; }
+    .genre-chip { background: #161f30; color: #94a3b8; border: 1px solid #23324a; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; white-space: nowrap; cursor: pointer; }
+    .genre-chip.active { background: #38bdf8; color: #0b0f19; font-weight: 700; border-color: #38bdf8; }
+    .anime-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 12px; }
+    .anime-card { background: #111827; border: 1px solid #1f2937; border-radius: 12px; overflow: hidden; cursor: pointer; }
+    .anime-poster { width: 100%; height: 180px; object-fit: cover; }
+    .anime-detail { padding: 8px 10px; }
+    .anime-title { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff; }
+    .anime-score { font-size: 11px; color: #f59e0b; margin-top: 3px; }
+
+    /* Modal Popup */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 200; padding: 16px; }
+    .modal-box { background: #161f30; border: 1px solid #2e3d55; border-radius: 16px; width: 100%; max-width: 360px; padding: 18px; position: relative; }
+    .modal-close { position: absolute; right: 14px; top: 14px; background: none; border: none; color: #94a3b8; font-size: 18px; cursor: pointer; }
+
+    /* Community Lounge */
+    .chat-shell { height: calc(100vh - 195px); display: flex; flex-direction: column; padding: 12px; }
+    .chat-msgs { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+    .chat-bubble { background: #161f30; border: 1px solid #23324a; border-radius: 10px; padding: 10px 12px; max-width: 85%; }
+    .chat-user { font-size: 11px; font-weight: 700; color: #38bdf8; margin-bottom: 2px; }
+    .chat-text { font-size: 13px; color: #f1f5f9; word-break: break-word; }
+    .chat-form { display: flex; gap: 8px; margin-top: 10px; }
+  </style>
+</head>
+<body>
+
+  <!-- Top Header -->
+  <header>
+    <div class="brand">
+      <i class="fa-solid fa-fire-flame-curved" style="color: #38bdf8; font-size: 20px;"></i>
+      <div>
+        <div class="brand-title">AniVortex</div>
+        <div class="brand-sub">the world you belong to.</div>
+      </div>
+    </div>
+    <div style="font-size: 20px; color: #f59e0b;"><i class="fa-solid fa-crown"></i></div>
+  </header>
+
+  <!-- ================= TAB 1: COMMUNITY LOUNGE ================= -->
+  <section id="sec-community" class="tab-content">
+    <div class="chat-shell">
+      <div class="chat-msgs" id="chat-stream">
+        <div class="chat-bubble">
+          <div class="chat-user">SystemBot</div>
+          <div class="chat-text">Welcome to AniVortex Lounge! Drop your anime thoughts below.</div>
         </div>
-        <ul class="drawer-menu">
-            <li class="drawer-item" onclick="toggleLanguage()">
-                🌐 <span id="langMenuText">Language: English</span>
-            </li>
-            <li class="drawer-item" onclick="openProfileModal()">
-                👤 <span>Edit Profile</span>
-            </li>
-            <li class="drawer-item" onclick="resetLocalCache()">
-                🧹 <span>Clear Local Data</span>
-            </li>
-            <li class="drawer-item" onclick="alert('AniVortex v2.0\nthe world you belong to.\nOfficial global database sync enabled.')">
-                ℹ️ <span>About Platform</span>
-            </li>
-        </ul>
+      </div>
+      <div class="chat-form">
+        <input type="text" id="chat-input" class="search-input" placeholder="Say something..." style="margin: 0;">
+        <button id="chat-send-btn" class="vote-btn btn-male-1" style="flex: 0 0 54px;"><i class="fa-solid fa-paper-plane"></i></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= TAB 2: POLLS (DAILY BATTLES & RANKING) ================= -->
+  <section id="sec-polls" class="tab-content active">
+
+    <!-- Male Battle Card -->
+    <div class="poll-card">
+      <div class="poll-badge">
+        <span style="color: #38bdf8;">⚡ Daily Face-Off</span>
+        <span class="timer-pill" id="male-timer">00:00:00</span>
+      </div>
+      <div class="poll-title" id="male-title">Loading Matchup...</div>
+      <div class="btn-grid" id="male-btns">
+        <button class="vote-btn btn-male-1" id="m-btn-1" onclick="castVote('male', 1)">Vote</button>
+        <button class="vote-btn btn-male-2" id="m-btn-2" onclick="castVote('male', 2)">Vote</button>
+      </div>
+      <div class="results-box" id="male-results">
+        <div class="bar-shell">
+          <div class="bar-fill-1" id="male-bar-1" style="background: #2563eb; width: 50%;"></div>
+          <div class="bar-fill-2" id="male-bar-2" style="background: #dc2626; width: 50%;"></div>
+        </div>
+        <div class="stats-label">
+          <span id="male-label-1">0 Votes (0%)</span>
+          <span id="male-label-2">0 Votes (0%)</span>
+        </div>
+      </div>
+      <div class="share-tray">
+        <button class="share-btn share-wa" id="m-share-wa"><i class="fa-brands fa-whatsapp"></i> WhatsApp</button>
+        <button class="share-btn share-rd" id="m-share-rd"><i class="fa-brands fa-reddit"></i> Reddit</button>
+      </div>
     </div>
 
-    <header>
-        <div class="header-left">
-            <button class="icon-btn" onclick="toggleDrawer()">☰</button>
-            <div class="brand-box" id="brandBox" onclick="handleBrandTaps()">
-                <div class="brand-title">
-                    <svg class="brand-logo-svg" viewBox="0 0 512 512">
-                        <path d="M60 330 C120 70 340 90 440 240 C420 380 250 420 180 340" fill="none" stroke="#00f0ff" stroke-width="38" stroke-linecap="round"/>
-                        <polygon points="256,60 140,260 256,450 230,260" fill="#2a334a"/>
-                        <polygon points="256,60 372,260 256,450 282,260" fill="#141a26"/>
-                        <line x1="256" y1="60" x2="140" y2="260" stroke="#ffffff" stroke-width="4"/>
-                        <polygon points="256,230 264,252 286,256 266,268 272,290 256,276 240,290 246,268 226,256 248,252" fill="#ffffff"/>
-                    </svg>
-                    <span>AniVortex</span>
-                    <span class="admin-badge" id="adminBadge">ADMIN</span>
-                </div>
-                <div class="brand-slogan" id="brandSlogan">the world you belong to.</div>
-            </div>
+    <!-- Female Beauty Showdown Card -->
+    <div class="poll-card">
+      <div class="poll-badge">
+        <span style="color: #ec4899;">✨ Beauty Showdown</span>
+        <span class="timer-pill" id="female-timer">00:00:00</span>
+      </div>
+      <div class="poll-title" id="female-title">Loading Matchup...</div>
+      <div class="btn-grid" id="female-btns">
+        <button class="vote-btn btn-female-1" id="f-btn-1" onclick="castVote('female', 1)">Vote</button>
+        <button class="vote-btn btn-female-2" id="f-btn-2" onclick="castVote('female', 2)">Vote</button>
+      </div>
+      <div class="results-box" id="female-results">
+        <div class="bar-shell">
+          <div class="bar-fill-1" id="female-bar-1" style="background: #db2777; width: 50%;"></div>
+          <div class="bar-fill-2" id="female-bar-2" style="background: #7c3aed; width: 50%;"></div>
         </div>
-        <div class="header-right">
-            <img class="user-avatar-badge" id="headerAvatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=Gojo" alt="Avatar" onclick="openProfileModal()">
+        <div class="stats-label">
+          <span id="female-label-1">0 Votes (0%)</span>
+          <span id="female-label-2">0 Votes (0%)</span>
         </div>
-    </header>
-
-    <div class="tab-view active" id="tab-community">
-        <div class="view-title">
-            <span>👥</span> <span id="label-community">Community Lounge</span>
-        </div>
-        <div class="chat-container">
-            <div class="chat-messages" id="chatMessages"></div>
-            <div class="chat-input-bar">
-                <input type="text" class="chat-input" id="chatInput" placeholder="Join the discussion..." maxlength="250" onkeypress="handleChatEnter(event)">
-                <button class="chat-send-btn" onclick="sendChatMessage()">➤</button>
-            </div>
-        </div>
+      </div>
+      <div class="share-tray">
+        <button class="share-btn share-wa" id="f-share-wa"><i class="fa-brands fa-whatsapp"></i> WhatsApp</button>
+        <button class="share-btn share-rd" id="f-share-rd"><i class="fa-brands fa-reddit"></i> Reddit</button>
+      </div>
     </div>
 
-        <div class="tab-view" id="tab-polls">
-        <div class="view-title">
-            <span>🔥</span> <span id="label-polls">Most Loved Characters</span>
-        </div>
-        <input type="text" id="charSearchInput" class="chat-input" style="width:100%; margin-bottom:12px;" placeholder="Search any character (Goku, Naruto, Levi, Luffy...)" oninput="searchCharacters(this.value)">
-            <!-- Daily Battles Container -->
-<div id="dailyPollsWrapper" style="padding: 12px; max-width: 550px; margin: 0 auto;">
-  
-  <!-- Male Category -->
-  <div style="margin-bottom: 24px;">
-    <div style="color: var(--accent-cyan); font-weight: 800; font-size: 0.9rem; margin-bottom: 8px; letter-spacing: 0.5px;">
-      ⚡ WHO IS YOUR FAVOURITE CHARACTER?
+    <!-- Most Loved Characters Section -->
+    <div style="padding: 10px 14px 4px;">
+      <h3 style="font-size: 16px; font-weight: 800; color: #fff;"><i class="fa-solid fa-fire" style="color: #f59e0b;"></i> Most Loved Characters</h3>
     </div>
-    <div id="malePollBox" class="daily-battle-box"></div>
+    <div class="search-box-wrap">
+      <input type="text" id="char-search" class="search-input" placeholder="Search character (Levi, Gojo, Luffy...)" oninput="filterCharacters()">
+    </div>
+    <div id="character-list"></div>
+  </section>
+      <!-- ================= TAB 3: ANIME VAULT ================= -->
+  <section id="sec-anime" class="tab-content">
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 14px 6px;">
+      <h3 style="font-size: 16px; font-weight: 800; color: #fff;"><i class="fa-solid fa-film" style="color: #38bdf8;"></i> Anime Vault</h3>
+      <button onclick="surpriseAnime()" style="background: #1e293b; color: #f59e0b; border: 1px solid #334155; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; cursor: pointer;">
+        🎲 Surprise Me
+      </button>
+    </div>
+
+    <!-- Genre Filters (Includes Harem & Case-Insensitive logic) -->
+    <div class="genre-row">
+      <div class="genre-chip active" onclick="filterGenre('All', this)">All</div>
+      <div class="genre-chip" onclick="filterGenre('Action', this)">Action</div>
+      <div class="genre-chip" onclick="filterGenre('Harem', this)">Harem</div>
+      <div class="genre-chip" onclick="filterGenre('Romance', this)">Romance</div>
+      <div class="genre-chip" onclick="filterGenre('Comedy', this)">Comedy</div>
+      <div class="genre-chip" onclick="filterGenre('Supernatural', this)">Supernatural</div>
+      <div class="genre-chip" onclick="filterGenre('Sci-Fi', this)">Sci-Fi</div>
+    </div>
+
+    <div class="anime-grid" id="anime-grid"></div>
+  </section>
+
+  <!-- ================= TAB 4: UPDATES ================= -->
+  <section id="sec-updates" class="tab-content">
+    <div style="padding: 14px;">
+      <h3 style="font-size: 16px; font-weight: 800; color: #fff; margin-bottom: 12px;"><i class="fa-solid fa-bullhorn" style="color: #ef4444;"></i> Anime Releases & News</h3>
+      <div class="poll-card" style="margin: 0 0 12px 0;">
+        <div style="color: #38bdf8; font-size: 12px; font-weight: 700;">🔥 Season Premiere</div>
+        <div style="font-size: 14px; font-weight: 700; margin: 4px 0; color: #fff;">Chainsaw Man: Reze Arc Movie</div>
+        <div style="font-size: 12px; color: #94a3b8;">Worldwide theatrical release scheduled. Teaser trailer is now live!</div>
+      </div>
+      <div class="poll-card" style="margin: 0;">
+        <div style="color: #f59e0b; font-size: 12px; font-weight: 700;">✨ Character Spotlight</div>
+        <div style="font-size: 14px; font-weight: 700; margin: 4px 0; color: #fff;">Celebrating Gojo Satoru Day</div>
+        <div style="font-size: 12px; color: #94a3b8;">Join the discussion in Community Lounge and vote in today's Daily Face-Off!</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Anime Details Modal Popup -->
+  <div class="modal-overlay" id="anime-modal">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
+      <img id="m-poster" src="" style="width: 100%; height: 160px; object-fit: cover; border-radius: 10px; margin-bottom: 10px;">
+      <h3 id="m-title" style="font-size: 16px; color: #fff; margin-bottom: 4px;"></h3>
+      <div id="m-meta" style="font-size: 11px; color: #38bdf8; font-weight: 700; margin-bottom: 8px;"></div>
+      <p id="m-synopsis" style="font-size: 12px; color: #cbd5e1; line-height: 1.5;"></p>
+    </div>
   </div>
 
-  <!-- Female Category -->
-  <div style="margin-bottom: 24px;">
-    <div style="color: #ff77a9; font-weight: 800; font-size: 0.9rem; margin-bottom: 8px; letter-spacing: 0.5px;">
-      ✨ WHO IS THE MOST BEAUTIFUL? (BEAUTY SHOWDOWN)
-    </div>
-    <div id="femalePollBox" class="daily-battle-box"></div>
-  </div>
-
-</div>
-            
-        <div id="characterList"></div>
-        <button id="loadMoreCharsBtn" onclick="loadMoreCharacters()" style="width:100%; padding:10px; background:var(--bg-card); border:1px solid var(--border); color:var(--accent-cyan); border-radius:8px; font-weight:700; cursor:pointer; margin-top:10px;">
-            ⬇️ Load More Characters
-        </button>
-        </div>
-        
-
-        <div class="tab-view" id="tab-anime">
-        <div class="view-title">
-            <span>🎬</span> <span id="label-anime">Anime Vault</span>
-        </div>
-        
-        <!-- एनीमे लाइव सर्च बार -->
-        <input type="text" id="animeSearchInput" class="chat-input" style="width:100%; margin-bottom:10px;" placeholder="Search any anime (Attack on Titan, Naruto, Solo Leveling...)" oninput="searchAnime(this.value)">
-
-        <!-- एडवांस फ़िल्टर बार (Rating, Year, Language, Format) -->
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:12px;">
-            <select id="filterSort" class="chat-input" style="padding:8px; font-size:0.82rem;" onchange="applyAnimeFilters()">
-                <option value="POPULARITY_DESC">🔥 Most Popular</option>
-                <option value="SCORE_DESC">⭐ Highest Rated</option>
-                <option value="TRENDING_DESC">📈 Trending Now</option>
-                <option value="START_DATE_DESC">✨ Recently Released</option>
-            </select>
-
-            <select id="filterYear" class="chat-input" style="padding:8px; font-size:0.82rem;" onchange="applyAnimeFilters()">
-                <option value="">📅 All Years</option>
-                <option value="2026">2026 Releases</option>
-                <option value="2025">2025</option>
-                <option value="2024">2024</option>
-                <option value="2023">2023</option>
-                <option value="2022">2022</option>
-                <option value="2020">2020</option>
-                <option value="2015">2015</option>
-                <option value="2010">2010</option>
-                <option value="2000">Classic (2000)</option>
-            </select>
-
-            <select id="filterLang" class="chat-input" style="padding:8px; font-size:0.82rem;" onchange="applyAnimeFilters()">
-                <option value="">🌐 Audio / Origin (All)</option>
-                <option value="JP">🇯🇵 Japanese Audio (Sub/Dub)</option>
-                <option value="CN">🇨🇳 Chinese (Donghua)</option>
-                <option value="KR">🇰🇷 Korean (Aeni)</option>
-            </select>
-
-            <select id="filterFormat" class="chat-input" style="padding:8px; font-size:0.82rem;" onchange="applyAnimeFilters()">
-                <option value="">📺 All Formats</option>
-                <option value="TV">TV Series</option>
-                <option value="MOVIE">Anime Movies</option>
-                <option value="OVA">OVA / Special</option>
-            </select>
-        </div>
-
-        <!-- शैलियों (Genres) की चिप्स -->
-        <div class="genre-chips-container" id="genreContainer" style="margin-bottom:12px;"></div>
-
-        <!-- एनीमे ग्रिड -->
-        <div class="anime-grid" id="animeGrid"></div>
-
-        <!-- लोड मोर बटन -->
-        <button id="loadMoreAnimeBtn" onclick="loadMoreAnime()" style="width:100%; padding:11px; background:var(--bg-card); border:1px solid var(--border); color:var(--accent-cyan); border-radius:8px; font-weight:700; cursor:pointer; margin-top:14px;">
-            ⬇️ Load More Anime
-        </button>
-        </div>
-        
-
-    <div class="tab-view" id="tab-updates">
-        <div class="view-title">
-            <span>📢</span> <span id="label-updates">Anime Updates & Releases</span>
-        </div>
-        
-        <div class="bday-banner" id="bdayBanner">
-            <img class="bday-img" id="bdayImg" src="https://images.unsplash.com/photo-1578632767115-351597cf2477?w=150" alt="Birthday">
-            <div class="bday-info">
-                <h4 id="bdayTitle">🎂 Character Birthday Spotlight</h4>
-                <p id="bdayDesc">Celebrating Levi Ackerman today! Wish them on the community lounge.</p>
-            </div>
-        </div>
-
-        <div class="updates-feed" id="updatesFeed"></div>
-    </div>
-
-    <div class="modal" id="animeModal" onclick="closeAnimeModal(event)">
-        <div class="modal-sheet" onclick="event.stopPropagation()">
-            <button class="modal-close" onclick="closeAnimeModal()">✕</button>
-            <h2 id="modalAnimeTitle" style="font-size:1.2rem; margin-bottom:4px;">Anime Title</h2>
-            <div id="modalAnimeSeason" style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:12px;">2026 • Action</div>
-
-            <div id="modalOfficialScoreBox"></div>
-
-            <h4 style="font-size:0.85rem; color:var(--text-secondary); margin-top:12px;">RATE THIS ANIME (1 TO 10 STARS)</h4>
-            <div class="star-rating-bar" id="starBar"></div>
-            <div id="userRatingFeedback" style="font-size:0.8rem; color:var(--accent-gold); margin-bottom:14px;">Tap a star to rate</div>
-
-            <h4 style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:6px;">SPOILER-FREE STORYLINE</h4>
-            <p id="modalAnimePlot" style="font-size:0.85rem; line-height:1.5; color:#d0d7de; margin-bottom:16px;">
-                Plot loading...
-            </p>
-
-            <h4 style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:6px;">MAIN CAST & VOICE ACTORS</h4>
-            <div class="cast-scroll" id="modalCastList"></div>
-
-            <h4 style="font-size:0.85rem; color:var(--text-secondary); margin-top:14px; margin-bottom:6px;">WHERE TO WATCH</h4>
-            <div class="watch-badges">
-                <a href="https://www.crunchyroll.com" target="_blank" class="watch-badge">Crunchyroll</a>
-                <a href="https://www.netflix.com" target="_blank" class="watch-badge">Netflix</a>
-                <a href="https://www.youtube.com" target="_blank" class="watch-badge">Muse Asia</a>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal" id="profileModal" onclick="closeProfileModal(event)">
-        <div class="modal-sheet" onclick="event.stopPropagation()">
-            <button class="modal-close" onclick="closeProfileModal()">✕</button>
-            <h3 style="margin-bottom:12px;">Otaku Profile</h3>
-            <label style="font-size:0.8rem; color:var(--text-secondary);">Your Display Nickname</label>
-            <input type="text" id="profileNameInput" class="chat-input" style="width:100%; margin:8px 0 16px;">
-            
-            <label style="font-size:0.8rem; color:var(--text-secondary);">Choose Avatar</label>
-            <div style="display:flex; gap:10px; margin:10px 0 18px; overflow-x:auto;">
-                <img src="https://api.dicebear.com/7.x/bottts/svg?seed=Gojo" class="user-avatar-badge" style="width:45px;height:45px;" onclick="setAvatarSeed('Gojo')">
-                <img src="https://api.dicebear.com/7.x/bottts/svg?seed=Light" class="user-avatar-badge" style="width:45px;height:45px;" onclick="setAvatarSeed('Light')">
-                <img src="https://api.dicebear.com/7.x/bottts/svg?seed=Luffy" class="user-avatar-badge" style="width:45px;height:45px;" onclick="setAvatarSeed('Luffy')">
-                <img src="https://api.dicebear.com/7.x/bottts/svg?seed=Zoro" class="user-avatar-badge" style="width:45px;height:45px;" onclick="setAvatarSeed('Zoro')">
-                <img src="https://api.dicebear.com/7.x/bottts/svg?seed=Levi" class="user-avatar-badge" style="width:45px;height:45px;" onclick="setAvatarSeed('Levi')">
-            </div>
-            <button class="chat-send-btn" style="width:100%; border-radius:8px; height:42px;" onclick="saveProfile()">Save Profile</button>
-        </div>
-    </div>
-
-    <nav class="bottom-nav">
-        <button class="nav-tab active" onclick="switchTab('community')">
-            <span class="tab-icon">👥</span>
-            <span id="tabLabelCommunity">Community</span>
-        </button>
-        <button class="nav-tab" onclick="switchTab('polls')">
-            <span class="tab-icon">🗳️</span>
-            <span id="tabLabelPolls">Polls</span>
-        </button>
-        <button class="nav-tab" onclick="switchTab('anime')">
-            <span class="tab-icon">🎬</span>
-            <span id="tabLabelAnime">Anime</span>
-        </button>
-        <button class="nav-tab" onclick="switchTab('updates')">
-            <span class="tab-icon">📢</span>
-            <span id="tabLabelUpdates">Updates</span>
-        </button>
-    </nav>
-
-    <script>
-        const ADMIN_PIN = "66666660";
-        let isAdmin = localStorage.getItem("anivortex_isAdmin") === "true";
-
-        let currentLang = localStorage.getItem("anivortex_lang") || "en";
-        let userProfile = JSON.parse(localStorage.getItem("anivortex_user")) || {
-            name: "Otaku_" + Math.floor(100 + Math.random() * 900),
-            avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=Gojo"
-        };
-        let userVotes = JSON.parse(localStorage.getItem("anivortex_votes")) || {};
-        let userRatings = JSON.parse(localStorage.getItem("anivortex_ratings")) || {};
-        let brandTapCount = 0;
-        let brandTapTimer = null;
-        let currentModalAnimeId = null;
-
-        const GENRES = ["All", "Action", "Romance", "Psychological", "Shonen", "Thriller", "Slice of Life", "Fantasy"];
-        let activeGenre = "All";
-
-        let charactersData = [
-            { id: 1, name: "Satoru Gojo", anime: "Jujutsu Kaisen", img: "https://s4.anilist.co/file/anilistcdn/character/large/b127997-622v4K1t33yP.png", score: 1480 },
-            { id: 2, name: "Light Yagami", anime: "Death Note", img: "https://s4.anilist.co/file/anilistcdn/character/large/b80-s6fA4A5c7c2F.png", score: 1395 },
-            { id: 3, name: "Roronoa Zoro", anime: "One Piece", img: "https://s4.anilist.co/file/anilistcdn/character/large/b62-Wq0vDq5zL45M.png", score: 1320 },
-            { id: 4, name: "Levi Ackerman", anime: "Attack on Titan", img: "https://s4.anilist.co/file/anilistcdn/character/large/b45627-V9QxQ7eW3QvL.png", score: 1290 }
-        ];
-
-        let chatMessagesData = JSON.parse(localStorage.getItem("anivortex_chat")) || [
-            { id: 1, user: "KuroFan", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=Luffy", text: "Welcome to AniVortex! the world you belong to.", time: "18:00" },
-            { id: 2, user: "OtakuSensei", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=Light", text: "Remember to promote your favourite characters!", time: "18:02" }
-        ];
-
-        const i18n = {
-            en: {
-                community: "Community Lounge",
-                polls: "Most Loved Characters",
-                anime: "Anime Vault",
-                updates: "Anime Updates & Releases",
-                tabCommunity: "Community",
-                tabPolls: "Polls",
-                tabAnime: "Anime",
-                tabUpdates: "Updates",
-                langMenu: "Language: English",
-                slogan: "the world you belong to."
-            },
-            hi: {
-                community: "कम्युनिटी लाउंज",
-                polls: "सबसे पसंदीदा कैरेक्टर्स",
-                anime: "एनीमे वॉल्ट",
-                updates: "अपडेट्स व नए रिलीज",
-                tabCommunity: "कम्युनिटी",
-                tabPolls: "पोल्स",
-                tabAnime: "एनीमे",
-                tabUpdates: "अपडेट्स",
-                langMenu: "भाषा: हिंदी",
-                slogan: "the world you belong to."
-            }
-        };
-
-        document.addEventListener("DOMContentLoaded", () => {
-            applyAdminUI();
-            applyLanguage();
-            renderProfileBadge();
-            renderCommunityChat();
-            renderCharacters();
-            renderGenreChips();
-            fetchAnimeByGenre("All");
-            fetchUpcomingTrailers();
-        });
-
-        function switchTab(tabKey) {
-            document.querySelectorAll(".tab-view").forEach(el => el.classList.remove("active"));
-            document.querySelectorAll(".nav-tab").forEach(el => el.classList.remove("active"));
-
-            document.getElementById(`tab-${tabKey}`).classList.add("active");
-            event.currentTarget.classList.add("active");
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function toggleDrawer() {
-            document.getElementById("sideDrawer").classList.toggle("active");
-            document.getElementById("drawerOverlay").classList.toggle("active");
-        }
-
-        function toggleLanguage() {
-            currentLang = currentLang === "en" ? "hi" : "en";
-            localStorage.setItem("anivortex_lang", currentLang);
-            applyLanguage();
-            toggleDrawer();
-        }
-
-        function applyLanguage() {
-            const t = i18n[currentLang];
-            document.getElementById("label-community").innerText = t.community;
-            document.getElementById("label-polls").innerText = t.polls;
-            document.getElementById("label-anime").innerText = t.anime;
-            document.getElementById("label-updates").innerText = t.updates;
-            document.getElementById("tabLabelCommunity").innerText = t.tabCommunity;
-            document.getElementById("tabLabelPolls").innerText = t.tabPolls;
-            document.getElementById("tabLabelAnime").innerText = t.tabAnime;
-            document.getElementById("tabLabelUpdates").innerText = t.tabUpdates;
-            document.getElementById("langMenuText").innerText = t.langMenu;
-            document.getElementById("brandSlogan").innerText = t.slogan;
-        }
-
-        function handleBrandTaps() {
-            brandTapCount++;
-            clearTimeout(brandTapTimer);
-            brandTapTimer = setTimeout(() => { brandTapCount = 0; }, 900);
-
-            if (brandTapCount >= 3) {
-                brandTapCount = 0;
-                promptAdminAuth();
-            }
-        }
-
-        function promptAdminAuth() {
-            const input = prompt(isAdmin ? "Admin mode is ACTIVE.\nType 'logout' to disable or enter 8-digit PIN:" : "Enter 8-digit Secret Admin PIN:");
-            if (!input) return;
-
-            if (input.trim() === "logout") {
-                isAdmin = false;
-                localStorage.setItem("anivortex_isAdmin", "false");
-                applyAdminUI();
-                alert("Logged out from Admin Mode.");
-            } else if (input.trim() === ADMIN_PIN) {
-                isAdmin = true;
-                localStorage.setItem("anivortex_isAdmin", "true");
-                applyAdminUI();
-                alert("⚡ Admin Mode Verified & Activated!");
-            } else {
-                alert("Invalid PIN!");
-            }
-        }
-
-        function applyAdminUI() {
-            const badge = document.getElementById("adminBadge");
-            if (isAdmin) {
-                badge.classList.add("active");
-            } else {
-                badge.classList.remove("active");
-            }
-            renderCommunityChat();
-        }
-
-        function renderCommunityChat() {
-            const container = document.getElementById("chatMessages");
-            container.innerHTML = "";
-            chatMessagesData.forEach(msg => {
-                const isMine = msg.user === userProfile.name;
-                const bubble = document.createElement("div");
-                bubble.className = `chat-bubble ${isMine ? 'mine' : ''}`;
-                bubble.innerHTML = `
-                    <div class="chat-user-row">
-                        <img src="${msg.avatar}" style="width:16px;height:16px;border-radius:50%;">
-                        <span>${escapeHtml(msg.user)}</span>
-                        ${isAdmin ? `<button class="mod-del-btn" onclick="deleteChatMessage(${msg.id})">🗑️ Delete</button>` : ''}
-                    </div>
-                    <div class="chat-text">${escapeHtml(msg.text)}</div>
-                    <div class="chat-time">${msg.time}</div>
-                `;
-                container.appendChild(bubble);
-            });
-            container.scrollTop = container.scrollHeight;
-        }
-
-        function sendChatMessage() {
-            const input = document.getElementById("chatInput");
-            const text = input.value.trim();
-            if (!text) return;
-
-            const now = new Date();
-            const timeStr = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
-
-            chatMessagesData.push({
-                id: Date.now(),
-                user: userProfile.name,
-                avatar: userProfile.avatar,
-                text: text,
-                time: timeStr
-            });
-
-            if (chatMessagesData.length > 60) chatMessagesData.shift();
-            localStorage.setItem("anivortex_chat", JSON.stringify(chatMessagesData));
-            input.value = "";
-            renderCommunityChat();
-        }
-
-        function handleChatEnter(e) {
-            if (e.key === 'Enter') sendChatMessage();
-        }
-
-        function deleteChatMessage(id) {
-            if (!isAdmin) return;
-            chatMessagesData = chatMessagesData.filter(m => m.id !== id);
-            localStorage.setItem("anivortex_chat", JSON.stringify(chatMessagesData));
-            renderCommunityChat();
-        }
-
-                charactersData = [];
-        let charPage = 1;
-        let charSearchQuery = "";
-        let charVoteOffsets = JSON.parse(localStorage.getItem("anivortex_char_offsets")) || {};
-
-        async function fetchCharacters(page = 1, search = "", append = false) {
-            const container = document.getElementById("characterList");
-            if (!container) return;
-            if (!append) container.innerHTML = "<div style='color:var(--text-secondary); padding:16px;'>Syncing characters from AniList...</div>";
-
-            const query = `
-                query ($page: Int, $search: String) {
-                    Page(page: $page, perPage: 20) {
-                        characters(sort: FAVOURITES_DESC, search: $search) {
-                            id
-                            name { full }
-                            image { large }
-                            favourites
-                            media(type: ANIME, sort: POPULARITY_DESC, perPage: 1) {
-                                nodes {
-                                    title { english romaji }
-                                }
-                            }
-                        }
-                    }
-                }
-            `;
-            const variables = { page: page };
-            if (search.trim()) variables.search = search.trim();
-
-            try {
-                const res = await fetch("https://calm-tarsier-2146.lightyagami00001010-coder.deno.net", {
-                    
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ query, variables })
-                });
-                const data = await res.json();
-                const list = data.data.Page.characters;
-
-                if (!append) charactersData = [];
-                list.forEach(c => {
-                    const animeName = c.media.nodes[0] ? (c.media.nodes[0].title.english || c.media.nodes[0].title.romaji) : "Anime";
-                    charactersData.push({
-                        id: c.id,
-                        name: c.name.full,
-                        anime: animeName,
-                        img: c.image.large,
-                        score: c.favourites + (charVoteOffsets[c.id] || 0)
-                    });
-                });
-                renderCharacters();
-            } catch(e) {
-                                if (!append) container.innerHTML = `<div style='color:red; padding:16px;'>Error: ${e.message}</div>`;
-                
-            }
-        }
-
-        let charSearchTimer = null;
-        function searchCharacters(val) {
-            clearTimeout(charSearchTimer);
-            charSearchTimer = setTimeout(() => {
-                charSearchQuery = val;
-                charPage = 1;
-                fetchCharacters(charPage, charSearchQuery, false);
-            }, 400);
-        }
-
-        function loadMoreCharacters() {
-            charPage++;
-            fetchCharacters(charPage, charSearchQuery, true);
-        }
-
-        function renderCharacters() {
-            const container = document.getElementById("characterList");
-            if (!container) return;
-            container.innerHTML = "";
-            charactersData.sort((a, b) => b.score - a.score);
-
-            charactersData.forEach(ch => {
-                const voted = userVotes[ch.id];
-                const card = document.createElement("div");
-                card.className = "char-card";
-                card.innerHTML = `
-                    <img class="char-img" src="${ch.img}" alt="${escapeHtml(ch.name)}" loading="lazy" referrerpolicy="no-referrer">
-                    <div class="char-info">
-                        <div class="char-name">${escapeHtml(ch.name)}</div>
-                        <div class="char-anime">${escapeHtml(ch.anime)}</div>
-                        <div class="char-score">⭐ ${ch.score.toLocaleString()} Points</div>
-                    </div>
-                    <div class="vote-actions">
-                        <button class="vote-btn ${voted === 'promote' ? 'promoted' : ''}" onclick="handleCharacterVote(${ch.id}, 'promote')">
-                            🔼 Promote
-                        </button>
-                        <button class="vote-btn ${voted === 'demote' ? 'demoted' : ''}" onclick="handleCharacterVote(${ch.id}, 'demote')">
-                            🔽 Demote
-                        </button>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        function handleCharacterVote(charId, action) {
-            const current = userVotes[charId];
-            const char = charactersData.find(c => c.id === charId);
-            if (!char) return;
-
-            let diff = 0;
-            if (current === action) {
-                diff = (action === 'promote' ? -1 : 1);
-                delete userVotes[charId];
-            } else {
-                if (current === 'promote') diff -= 1;
-                if (current === 'demote') diff += 1;
-                diff += (action === 'promote' ? 1 : -1);
-                userVotes[charId] = action;
-            }
-
-            char.score += diff;
-            charVoteOffsets[charId] = (charVoteOffsets[charId] || 0) + diff;
-
-            localStorage.setItem("anivortex_votes", JSON.stringify(userVotes));
-            localStorage.setItem("anivortex_char_offsets", JSON.stringify(charVoteOffsets));
-            renderCharacters();
-        }
-
-        fetchCharacters(1, "", false);
-                async function fetchDailyBirthday() {
-            const bdayImg = document.getElementById("bdayImg");
-            const bdayDesc = document.getElementById("bdayDesc");
-            if (!bdayDesc) return;
-
-            const query = `
-                query {
-                    Page(page: 1, perPage: 1) {
-                        characters(isBirthday: true, sort: FAVOURITES_DESC) {
-                            name { full }
-                            image { large }
-                            media(type: ANIME, sort: POPULARITY_DESC, perPage: 1) {
-                                nodes {
-                                    title { english romaji }
-                                }
-                            }
-                        }
-                    }
-                }
-            `;
-
-            try {
-                const res = await fetch("https://graphql.anilist.co", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ query })
-                });
-                const data = await res.json();
-                const char = data?.data?.Page?.characters[0];
-                if (char) {
-                    const anime = char.media.nodes[0] ? (char.media.nodes[0].title.english || char.media.nodes[0].title.romaji) : "";
-                    if (bdayImg) {
-                        bdayImg.src = char.image.large;
-                        bdayImg.referrerPolicy = "no-referrer";
-                    }
-                    bdayDesc.innerHTML = `Celebrating <strong>${char.name.full}</strong> ${anime ? `(${anime})` : ''} today! Wish them on the community lounge.`;
-                }
-            } catch (e) {}
-        }
-
-        fetchDailyBirthday();
-        
-        
-                // सभी प्रमुख शैलियाँ (Comedy, Harem, Ecchi सहित)
-        const ACCURATE_GENRES = [
-            "All", "Action", "Adventure", "Comedy", "Drama", "Ecchi", 
-            "Fantasy", "Harem", "Horror", "Mahou Shoujo", "Mecha", 
-            "Music", "Mystery", "Psychological", "Romance", "Sci-Fi", 
-            "Slice of Life", "Sports", "Supernatural", "Thriller"
-        ];
-
-        let animeVaultPage = 1;
-        let selectedGenres = []; // एक साथ कई शैलियाँ चुनने के लिए
-        let animeSearchText = "";
-        let animeSearchTimer = null;
-
-        function renderGenreChips() {
-            const container = document.getElementById("genreContainer");
-            if (!container) return;
-            container.innerHTML = "";
-            ACCURATE_GENRES.forEach(g => {
-                const chip = document.createElement("button");
-                const isActive = (g === "All" && selectedGenres.length === 0) || selectedGenres.includes(g);
-                chip.className = `genre-chip ${isActive ? 'active' : ''}`;
-                chip.innerText = g;
-                chip.onclick = () => toggleGenre(g);
-                container.appendChild(chip);
-            });
-        }
-
-        // एक से ज़्यादा जेनर सेलेक्ट/अन-सेलेक्ट करने का लॉजिक
-        function toggleGenre(genre) {
-            if (genre === "All") {
-                selectedGenres = [];
-            } else {
-                const index = selectedGenres.indexOf(genre);
-                if (index > -1) {
-                    selectedGenres.splice(index, 1);
-                } else {
-                    selectedGenres.push(genre);
-                }
-            }
-            animeVaultPage = 1;
-            renderGenreChips();
-            fetchAnimeVault(false);
-        }
-
-        async function fetchAnimeVault(append = false) {
-            const grid = document.getElementById("animeGrid");
-            if (!grid) return;
-            if (!append) grid.innerHTML = "<div style='grid-column: 1/-1; color:var(--text-secondary); padding:20px; text-align:center;'>Fetching curated anime...</div>";
-
-            const sortVal = document.getElementById("filterSort")?.value || "POPULARITY_DESC";
-            const yearVal = document.getElementById("filterYear")?.value ? parseInt(document.getElementById("filterYear").value) : null;
-            const langVal = document.getElementById("filterLang")?.value || null;
-            const formatVal = document.getElementById("filterFormat")?.value || null;
-
-            // मल्टी-फ़िल्टर सपोर्ट करने वाली AniList GraphQL क्वेरी
-            const query = `
-                query ($page: Int, $search: String, $genre_in: [String], $tag_in: [String], $sort: [MediaSort], $year: Int, $country: CountryCode, $format: MediaFormat) {
-                    Page(page: $page, perPage: 16) {
-                        media(type: ANIME, search: $search, genre_in: $genre_in, tag_in: $tag_in, sort: $sort, seasonYear: $year, countryOfOrigin: $country, format: $format) {
-                            id
-                            title { english romaji }
-                            coverImage { large }
-                            averageScore
-                            episodes
-                            format
-                            seasonYear
-                            countryOfOrigin
-                            genres
-                        }
-                    }
-                }
-            `;
-
-            const variables = { 
-                page: animeVaultPage, 
-                sort: [sortVal] 
-            };
-            
-            // Harem को Tag और बाकी को Genre में भेजना
-            if (selectedGenres.length > 0) {
-                const tags = selectedGenres.filter(g => g === "Harem");
-                const genres = selectedGenres.filter(g => g !== "Harem");
-                if (genres.length > 0) variables.genre_in = genres;
-                if (tags.length > 0) variables.tag_in = tags;
-            }
-
-            if (animeSearchText.trim()) variables.search = animeSearchText.trim();
-            if (yearVal) variables.year = yearVal;
-            if (langVal) variables.country = langVal;
-            if (formatVal) variables.format = formatVal;
-
-            try {
-                const res = await fetch("https://calm-tarsier-2146.lightyagami00001010-coder.deno.net", {
-                    
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ query, variables })
-                });
-                const data = await res.json();
-                const animeList = data?.data?.Page?.media || [];
-
-                if (!append) grid.innerHTML = "";
-                if (animeList.length === 0 && !append) {
-                    grid.innerHTML = "<div style='grid-column: 1/-1; color:var(--accent-red); padding:20px; text-align:center;'>No anime matches all selected filters.</div>";
-                    return;
-                }
-
-                animeList.forEach(anime => {
-                    const title = anime.title.english || anime.title.romaji || "Anime Title";
-                    const score = anime.averageScore ? (anime.averageScore / 10).toFixed(1) : "N/A";
-                    
-                    let langTag = "🇯🇵 Sub | Dub";
-                    if (anime.countryOfOrigin === "CN") langTag = "🇨🇳 Donghua";
-                    if (anime.countryOfOrigin === "KR") langTag = "🇰🇷 Korean";
-
-                    const card = document.createElement("div");
-                    card.className = "anime-card";
-                    card.onclick = () => openAnimeDetailModal(anime.id, title, (anime.seasonYear || anime.format || 'Anime'), (anime.genres || []), score);
-                    
-                    card.innerHTML = `
-                        <img class="anime-poster" src="${anime.coverImage.large}" alt="${escapeHtml(title)}" loading="lazy" referrerpolicy="no-referrer">
-                        <div class="anime-card-content">
-                            <div class="anime-title">${escapeHtml(title)}</div>
-                            <div style="font-size:0.75rem; color:var(--accent-gold); margin-top:2px;">⭐ ${score} / 10</div>
-                            <div style="font-size:0.7rem; color:var(--text-secondary); margin-top:3px; display:flex; justify-content:space-between;">
-                                <span>${anime.seasonYear || anime.format || 'Anime'}</span>
-                                <span style="color:var(--accent-cyan);">${langTag}</span>
-                            </div>
-                        </div>
-                    `;
-                    grid.appendChild(card);
-                });
-            } catch(e) {
-                                if (!append) grid.innerHTML = `<div style='grid-column: 1/-1; color:red; padding:20px; text-align:center;'>Error: ${e.message}</div>`;
-                
-            }
-        }
-
-        function searchAnime(val) {
-            clearTimeout(animeSearchTimer);
-            animeSearchTimer = setTimeout(() => {
-                animeSearchText = val;
-                animeVaultPage = 1;
-                fetchAnimeVault(false);
-            }, 400);
-        }
-
-        function applyAnimeFilters() {
-            animeVaultPage = 1;
-            fetchAnimeVault(false);
-        }
-
-        function loadMoreAnime() {
-            animeVaultPage++;
-            fetchAnimeVault(true);
-        }
-
-        renderGenreChips();
-        fetchAnimeVault(false);
-                                                                                         
-                
-
-    async function openAnimeDetailModal(id, title, year, genres, officialRating) {
-        currentModalAnimeId = id;
-        const modal = document.getElementById("animeModal");
-        modal.classList.add("active");
-
-        document.getElementById("modalAnimeTitle").innerText = title;
-        document.getElementById("modalAnimeSeason").innerText = `${year || 'Popular'} • ${genres ? genres.join(', ') : 'Anime'}`;
-        document.getElementById("modalAnimePlot").innerText = "Loading official synopsis...";
-        document.getElementById("modalCastList").innerHTML = "Loading cast...";
-
-        document.getElementById("modalOfficialScoreBox").innerHTML = `
-            <div style="background:var(--bg-card); padding:10px; border-radius:8px; border:1px solid var(--border); margin-bottom:12px;">
-                <div style="font-size:0.75rem; color:var(--accent-cyan); font-weight:700;">🌐 OFFICIAL GLOBAL DATABASE SCORE</div>
-                <div style="font-size:1.15rem; font-weight:800; color:#fff; margin-top:2px;">
-                    ⭐ ${officialRating} / 10 <span style="font-size:0.75rem; color:var(--text-secondary); font-weight:400;">(AniList Verified)</span>
-                </div>
-                <a href="https://anilist.co/anime/${id}" target="_blank" style="display:inline-block; margin-top:5px; font-size:0.75rem; color:var(--accent-gold); text-decoration:none;">
-                    Open Official Page to Rate Globally ↗
-                </a>
-            </div>
-        `;
-
-        renderStarRatingUI(userRatings[id] || 0);
-
-        const query = `
-            query ($id: Int) {
-                Media(id: $id) {
-                    description(asHtml: false)
-                    characters(sort: ROLE, perPage: 8) {
-                        edges {
-                            node {
-                                name { full }
-                                image { medium }
-                            }
-                        }
-                    }
-                }
-            }
-        `;
-
-        try {
-            const res = await fetch("https://calm-tarsier-2146.lightyagami00001010-coder.deno.net", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ query, variables: { id } })
-            });
-            const data = await res.json();
-            const media = data.data.Media;
-
-            let plot = media.description || "Official spoiler-free storyline coming soon.";
-            plot = plot.replace(/<[^>]*>?/gm, '');
-            document.getElementById("modalAnimePlot").innerText = plot;
-
-            const castContainer = document.getElementById("modalCastList");
-            castContainer.innerHTML = "";
-            media.characters.edges.forEach(edge => {
-                const charDiv = document.createElement("div");
-                charDiv.className = "cast-item";
-                charDiv.innerHTML = `
-                    <img class="cast-img" src="${edge.node.image.medium}" alt="${edge.node.name.full}">
-                    <div class="cast-name">${edge.node.name.full}</div>
-                `;
-                castContainer.appendChild(charDiv);
-            });
-        } catch (e) {
-            document.getElementById("modalAnimePlot").innerText = "Official synopsis currently unavailable.";
-        }
+  <!-- Bottom Navigation Bar -->
+  <nav class="bottom-nav">
+    <button class="nav-item" onclick="switchTab('community', this)"><i class="fa-solid fa-users"></i><span>Community</span></button>
+    <button class="nav-item active" onclick="switchTab('polls', this)"><i class="fa-solid fa-box-archive"></i><span>Polls</span></button>
+    <button class="nav-item" onclick="switchTab('anime', this)"><i class="fa-solid fa-clapperboard"></i><span>Anime</span></button>
+    <button class="nav-item" onclick="switchTab('updates', this)"><i class="fa-solid fa-bullhorn"></i><span>Updates</span></button>
+  </nav>
+
+  <!-- ================= JAVASCRIPT LOGIC ================= -->
+  <script>
+  (function() {
+    // 1. Vibration Helper (Haptic Feedback)
+    function vibe(ms = 40) {
+      if (window.navigator && window.navigator.vibrate) window.navigator.vibrate(ms);
     }
 
-    function closeAnimeModal() {
-        document.getElementById("animeModal").classList.remove("active");
-        currentModalAnimeId = null;
+    // 2. Tab Switcher
+    window.switchTab = function(tabId, el) {
+      vibe(30);
+      document.querySelectorAll('.tab-content').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      document.getElementById('sec-' + tabId).classList.add('active');
+      if (el) el.classList.add('active');
+      window.scrollTo(0, 0);
+    };
+
+    // 3. Indian Standard Time (IST) Day-of-Year & Midnight Countdown
+    function getISTInfo() {
+      const now = new Date();
+      const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+      const ist = new Date(utc + (3600000 * 5.5));
+      const start = new Date(ist.getFullYear(), 0, 0);
+      const diff = ist - start;
+      const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
+      
+      const midnight = new Date(ist);
+      midnight.setHours(24, 0, 0, 0);
+      const secLeft = Math.max(0, Math.floor((midnight - ist) / 1000));
+      return { dayOfYear, secLeft };
     }
 
-    function renderStarRatingUI(score) {
-        const container = document.getElementById("starBar");
-        container.innerHTML = "";
-        for (let i = 1; i <= 10; i++) {
-            const star = document.createElement("span");
-            star.innerHTML = "★";
-            if (i <= score) star.classList.add("active");
-            star.onclick = () => saveAnimeRating(i);
-            container.appendChild(star);
-        }
-        if (score > 0) {
-            document.getElementById("userRatingFeedback").innerText = `Your Local Rating: ⭐ ${score} / 10`;
-        } else {
-            document.getElementById("userRatingFeedback").innerText = "Tap a star to rate (1 to 10)";
-        }
+    function startCountdowns() {
+      setInterval(() => {
+        const { secLeft } = getISTInfo();
+        const h = String(Math.floor(secLeft / 3600)).padStart(2, '0');
+        const m = String(Math.floor((secLeft % 3600) / 60)).padStart(2, '0');
+        const s = String(secLeft % 60).padStart(2, '0');
+        const timerText = `${h}:${m}:${s}`;
+        document.getElementById('male-timer').innerText = timerText;
+        document.getElementById('female-timer').innerText = timerText;
+      }, 1000);
     }
 
-    function saveAnimeRating(score) {
-        if (!currentModalAnimeId) return;
-        userRatings[currentModalAnimeId] = score;
-        localStorage.setItem("anivortex_ratings", JSON.stringify(userRatings));
-        renderStarRatingUI(score);
-    }
-
-    async function fetchUpcomingTrailers() {
-        const feed = document.getElementById("updatesFeed");
-        feed.innerHTML = "<div style='color:var(--text-secondary);'>Fetching verified official trailers...</div>";
-
-        const query = `
-            query {
-                Page(page: 1, perPage: 4) {
-                    media(type: ANIME, status: NOT_YET_RELEASED, sort: POPULARITY_DESC) {
-                        title { english romaji }
-                        bannerImage
-                        coverImage { extraLarge }
-                        startDate { year }
-                        trailer { id site }
-                    }
-                }
-            }
-        `;
-
-        try {
-            const res = await fetch("https://graphql.anilist.co", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ query })
-            });
-            const data = await res.json();
-            const list = data.data.Page.media;
-
-            feed.innerHTML = "";
-            list.forEach(item => {
-                const title = item.title.english || item.title.romaji;
-                const poster = item.bannerImage || item.coverImage.extraLarge;
-                const card = document.createElement("div");
-                card.className = "update-card";
-                card.innerHTML = `
-                    <img class="update-poster" src="${poster}" alt="${title}">
-                    <div class="update-details">
-                        <span class="update-tag">OFFICIAL REVEAL</span>
-                        <h3 style="font-size:1rem; margin-bottom:6px;">${title}</h3>
-                        <p style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:10px;">
-                            Release Scheduled: ${item.startDate.year || '2026'}
-                        </p>
-                        ${item.trailer && item.trailer.site === "youtube" ? 
-                            `<a href="https://www.youtube.com/watch?v=${item.trailer.id}" target="_blank" class="watch-badge" style="display:inline-block;">▶ Watch Official Trailer</a>` : 
-                            `<span style="font-size:0.75rem; color:var(--text-secondary);">Studio Teaser Live</span>`}
-                    </div>
-                `;
-                feed.appendChild(card);
-            });
-        } catch (e) {
-            feed.innerHTML = "<div style='color:var(--text-secondary);'>Verified studio feed loaded.</div>";
-        }
-    }
-
-    function openProfileModal() {
-        document.getElementById("profileNameInput").value = userProfile.name;
-        document.getElementById("profileModal").classList.add("active");
-    }
-
-    function closeProfileModal() {
-        document.getElementById("profileModal").classList.remove("active");
-    }
-
-    function setAvatarSeed(seed) {
-        userProfile.avatar = `https://api.dicebear.com/7.x/bottts/svg?seed=${seed}`;
-        saveProfile();
-    }
-
-    function saveProfile() {
-        const name = document.getElementById("profileNameInput").value.trim();
-        if (name) userProfile.name = name;
-        localStorage.setItem("anivortex_user", JSON.stringify(userProfile));
-        renderProfileBadge();
-        closeProfileModal();
-    }
-
-    function renderProfileBadge() {
-        document.getElementById("headerAvatar").src = userProfile.avatar;
-    }
-
-    function resetLocalCache() {
-        if (confirm("Reset local votes, ratings and chat cache?")) {
-            localStorage.clear();
-            location.reload();
-        }
-    }
-
-    function escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-</script>
-        // 1. Male Matchups List
-const maleBattles = [
-  {
-    id: "m_battle_1",
-    c1: { name: "Satoru Gojo", anime: "Jujutsu Kaisen", img: "https://s4.anilist.co/file/anilistcdn/character/large/b127997-j2S87Xn7g2uG.png" },
-    c2: { name: "Kakashi Hatake", anime: "Naruto", img: "https://s4.anilist.co/file/anilistcdn/character/large/b85-gDq6QYvLwPvh.png" }
-  },
-  {
-    id: "m_battle_2",
-    c1: { name: "Monkey D. Luffy", anime: "One Piece", img: "https://s4.anilist.co/file/anilistcdn/character/large/b40-gN5jU4iYhB8t.png" },
-    c2: { name: "Naruto Uzumaki", anime: "Naruto", img: "https://s4.anilist.co/file/anilistcdn/character/large/b17-8z5W2sEaF7QY.png" }
-  },
-  {
-    id: "m_battle_3",
-    c1: { name: "Levi Ackerman", anime: "Attack on Titan", img: "https://s4.anilist.co/file/anilistcdn/character/large/b45627-5PscfW7WpM3s.png" },
-    c2: { name: "Roronoa Zoro", anime: "One Piece", img: "https://s4.anilist.co/file/anilistcdn/character/large/b62-mP5hI0Tz14eY.png" }
-  },
-  {
-    id: "m_battle_4",
-    c1: { name: "Light Yagami", anime: "Death Note", img: "https://s4.anilist.co/file/anilistcdn/character/large/b80-rJqB6s3uJ1j1.png" },
-    c2: { name: "L Lawliet", anime: "Death Note", img: "https://s4.anilist.co/file/anilistcdn/character/large/b71-1q2s3d4f5g6h.png" }
-  }
-];
-
-// 2. Female Matchups List (Beauty Showdown)
-const femaleBattles = [
-  {
-    id: "f_battle_1",
-    c1: { name: "Yor Forger", anime: "Spy x Family", img: "https://s4.anilist.co/file/anilistcdn/character/large/b163250-JbL35GgJc0B2.png" },
-    c2: { name: "Boa Hancock", anime: "One Piece", img: "https://s4.anilist.co/file/anilistcdn/character/large/b13380-4D5s6a7b8c9d.png" }
-  },
-  {
-    id: "f_battle_2",
-    c1: { name: "Marin Kitagawa", anime: "My Dress-Up Darling", img: "https://s4.anilist.co/file/anilistcdn/character/large/b151608-x9Y8z7a6b5c4.png" },
-    c2: { name: "Mai Sakurajima", anime: "Bunny Girl Senpai", img: "https://s4.anilist.co/file/anilistcdn/character/large/b127532-a1b2c3d4e5f6.png" }
-  },
-  {
-    id: "f_battle_3",
-    c1: { name: "Hinata Hyuga", anime: "Naruto", img: "https://s4.anilist.co/file/anilistcdn/character/large/b1555-8a9b0c1d2e3f.png" },
-    c2: { name: "Mikasa Ackerman", anime: "Attack on Titan", img: "https://s4.anilist.co/file/anilistcdn/character/large/b40881-0f1e2d3c4b5a.png" }
-  }
-];
-
-// 3. Indian Midnight Rotation Index
-function getTodayBattleIndex(arrayLength) {
-  const now = new Date();
-  const istOffset = 5.5 * 60 * 60 * 1000;
-  const ist = new Date(now.getTime() + istOffset);
-  const startOfYear = new Date(ist.getFullYear(), 0, 0);
-  const dayNumber = Math.floor((ist - startOfYear) / (1000 * 60 * 60 * 24));
-  return dayNumber % arrayLength;
-}
-
-// 4. Render Battle Cards
-function renderDailyBattles() {
-  const maleIndex = getTodayBattleIndex(maleBattles.length);
-  const femaleIndex = getTodayBattleIndex(femaleBattles.length);
-
-  buildBattleUI('malePollBox', maleBattles[maleIndex], 'male');
-  buildBattleUI('femalePollBox', femaleBattles[femaleIndex], 'female');
-}
-
-function buildBattleUI(containerId, battle, type) {
-  const container = document.getElementById(containerId);
-  if (!container) return;
-
-  const storageKey = `voted_${battle.id}`;
-  const userVote = localStorage.getItem(storageKey);
-
-  let count1 = parseInt(localStorage.getItem(`${battle.id}_c1`) || "48");
-  let count2 = parseInt(localStorage.getItem(`${battle.id}_c2`) || "52");
-  const total = count1 + count2;
-  const pct1 = Math.round((count1 / total) * 100);
-  const pct2 = 100 - pct1;
-
-  container.innerHTML = `
-    <div class="battle-fighters">
-      <div class="fighter-card" onclick="castDailyVote('${battle.id}', 'c1', '${type}')">
-        <img class="fighter-img" src="${battle.c1.img}" alt="${battle.c1.name}">
-        <div class="fighter-name">${battle.c1.name}</div>
-        <div class="fighter-anime">${battle.c1.anime}</div>
-        ${userVote ? `<div style="font-weight:bold; color:var(--accent-cyan); margin-top:4px;">${pct1}%</div>` : ''}
-      </div>
-
-      <div class="vs-badge">VS</div>
-
-      <div class="fighter-card" onclick="castDailyVote('${battle.id}', 'c2', '${type}')">
-        <img class="fighter-img" src="${battle.c2.img}" alt="${battle.c2.name}">
-        <div class="fighter-name">${battle.c2.name}</div>
-        <div class="fighter-anime">${battle.c2.anime}</div>
-        ${userVote ? `<div style="font-weight:bold; color:#ff77a9; margin-top:4px;">${pct2}%</div>` : ''}
-      </div>
-    </div>
-
-    ${userVote ? `
-      <div class="poll-results-bar">
-        <div class="bar-left" style="width: ${pct1}%"></div>
-        <div class="bar-right" style="width: ${pct2}%"></div>
-      </div>
-      <div style="font-size: 0.72rem; text-align: center; color: var(--text-secondary); margin-top: 4px;">
-        ✓ You voted! Resets at 12:00 AM IST.
-      </div>
-    ` : `
-      <div style="font-size: 0.72rem; text-align: center; color: var(--text-secondary); margin-top: 2px;">
-        Tap on your pick to cast vote
-      </div>
-    `}
-  `;
-}
-
-function castDailyVote(battleId, choice, type) {
-  const storageKey = `voted_${battleId}`;
-  if (localStorage.getItem(storageKey)) return;
-
-  const currentCount = parseInt(localStorage.getItem(`${battleId}_${choice}`) || (choice === 'c1' ? "48" : "52"));
-  localStorage.setItem(`${battleId}_${choice}`, currentCount + 1);
-  localStorage.setItem(storageKey, choice);
-
-  renderDailyBattles();
-}
-
-window.addEventListener('DOMContentLoaded', renderDailyBattles);
-        
-</body>
-</html>
-<!-- AUTO-INJECTED DAILY POLL (PASTE AT BOTTOM) -->
-<script>
-(function() {
-  function initDailyPoll() {
-    if (document.getElementById('daily-poll-box-ready')) return;
-
-    var battles = [
+    // 4. Polls Database
+    const maleBattles = [
       { c1: "Satoru Gojo", a1: "Jujutsu Kaisen", c2: "Kakashi Hatake", a2: "Naruto" },
       { c1: "Monkey D. Luffy", a1: "One Piece", c2: "Naruto Uzumaki", a2: "Naruto" },
       { c1: "Levi Ackerman", a1: "Attack on Titan", c2: "Roronoa Zoro", a2: "One Piece" },
       { c1: "Light Yagami", a1: "Death Note", c2: "L Lawliet", a2: "Death Note" }
     ];
 
-    var now = new Date();
-    var start = new Date(now.getFullYear(), 0, 0);
-    var dayOfYear = Math.floor((now - start) / (1000 * 60 * 60 * 24));
-    var today = battles[dayOfYear % battles.length];
+    const femaleBattles = [
+      { c1: "Yor Forger", a1: "Spy x Family", c2: "Boa Hancock", a2: "One Piece" },
+      { c1: "Marin Kitagawa", a1: "Dress-Up Darling", c2: "Mai Sakurajima", a2: "Bunny Girl" },
+      { c1: "Hinata Hyuga", a1: "Naruto", c2: "Mikasa Ackerman", a2: "Attack on Titan" }
+    ];
 
-    // Card UI Element
-    var pollCard = document.createElement('div');
-    pollCard.id = 'daily-poll-box-ready';
-    pollCard.style.cssText = 'margin: 16px 12px; background: #161f30; border: 1px solid #2e3d55; border-radius: 12px; padding: 16px; text-align: center; font-family: sans-serif; box-shadow: 0 4px 14px rgba(0,0,0,0.5);';
+    const { dayOfYear } = getISTInfo();
+    const curMale = maleBattles[dayOfYear % maleBattles.length];
+    const curFemale = femaleBattles[dayOfYear % femaleBattles.length];
 
-    pollCard.innerHTML = 
-      '<div style="font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: #38bdf8; font-weight: bold; margin-bottom: 6px;">⚡ TODAY\'S DAILY BATTLE</div>' +
-      '<div style="font-size: 16px; font-weight: bold; color: #ffffff; margin-bottom: 14px;">' +
-        today.c1 + ' <span style="color:#94a3b8;font-size:12px;">(' + today.a1 + ')</span> <span style="color:#f59e0b;">VS</span> ' + today.c2 + ' <span style="color:#94a3b8;font-size:12px;">(' + today.a2 + ')</span>' +
-      '</div>' +
-      '<div style="display: flex; gap: 10px; justify-content: center;">' +
-        '<button id="dp-vote-1" style="flex: 1; background: #2563eb; color: #ffffff; border: none; padding: 12px 6px; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer;">Vote ' + today.c1 + '</button>' +
-        '<button id="dp-vote-2" style="flex: 1; background: #dc2626; color: #ffffff; border: none; padding: 12px 6px; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer;">Vote ' + today.c2 + '</button>' +
-      '</div>' +
-      '<div id="dp-vote-msg" style="margin-top: 10px; font-size: 13px; color: #4ade80; min-height: 18px;"></div>';
+    function setupPollUI(type, match) {
+      const p = type === 'male' ? 'm' : 'f';
+      document.getElementById(`${type}-title`).innerHTML = `${match.c1} <span style="color:#94a3b8;font-size:12px;">(${match.a1})</span> <span style="color:#f59e0b;">VS</span> ${match.c2} <span style="color:#94a3b8;font-size:12px;">(${match.a2})</span>`;
+      document.getElementById(`${p}-btn-1`).innerText = `Vote ${match.c1}`;
+      document.getElementById(`${p}-btn-2`).innerText = `Vote ${match.c2}`;
 
-    // Auto-locate position on page
-    var target = null;
-    var all = document.querySelectorAll('div, p, span, h1, h2, h3, h4');
-    for (var i = 0; i < all.length; i++) {
-      if (all[i].innerText && (all[i].innerText.includes('BEAUTY SHOWDOWN') || all[i].innerText.includes('BEAUTIFUL'))) {
-        target = all[i];
-        break;
+      // Sharing Links
+      const siteUrl = window.location.href;
+      const shareTxt = encodeURIComponent(`Vote in today's battle: ${match.c1} vs ${match.c2} on AniVortex!\n${siteUrl}`);
+      document.getElementById(`${p}-share-wa`).onclick = () => window.open(`https://api.whatsapp.com/send?text=${shareTxt}`, '_blank');
+      document.getElementById(`${p}-share-rd`).onclick = () => window.open(`https://www.reddit.com/submit?title=${encodeURIComponent(match.c1 + ' vs ' + match.c2 + ' - Who wins?')}&url=${encodeURIComponent(siteUrl)}`, '_blank');
+
+      renderPollResults(type);
+    }
+
+    function renderPollResults(type) {
+      const p = type === 'male' ? 'm' : 'f';
+      const key = `poll_${type}_day_${dayOfYear}`;
+      const userVote = localStorage.getItem(key);
+
+      let c1Votes = parseInt(localStorage.getItem(`${key}_c1`)) || (type === 'male' ? 1420 : 1240);
+      let c2Votes = parseInt(localStorage.getItem(`${key}_c2`)) || (type === 'male' ? 870 : 960);
+      const total = c1Votes + c2Votes;
+      const pct1 = Math.round((c1Votes / total) * 100);
+      const pct2 = 100 - pct1;
+
+      if (userVote) {
+        document.getElementById(`${type}-btns`).style.display = 'none';
+        const resBox = document.getElementById(`${type}-results`);
+        resBox.style.display = 'block';
+        document.getElementById(`${type}-bar-1`).style.width = pct1 + '%';
+        document.getElementById(`${type}-bar-2`).style.width = pct2 + '%';
+        document.getElementById(`${type}-label-1`).innerHTML = `${c1Votes.toLocaleString()} Votes <b>(${pct1}%)</b>`;
+        document.getElementById(`${type}-label-2`).innerHTML = `<b>(${pct2}%)</b> ${c2Votes.toLocaleString()} Votes`;
       }
     }
 
-    if (target && target.parentNode) {
-      target.parentNode.insertBefore(pollCard, target.nextSibling);
-    } else {
-      document.body.appendChild(pollCard);
+    window.castVote = function(type, choice) {
+      vibe(50);
+      const key = `poll_${type}_day_${dayOfYear}`;
+      if (localStorage.getItem(key)) return;
+      localStorage.setItem(key, choice);
+
+      const countKey = `${key}_c${choice}`;
+      const cur = parseInt(localStorage.getItem(countKey)) || (type === 'male' ? (choice === 1 ? 1420 : 870) : (choice === 1 ? 1240 : 960));
+      localStorage.setItem(countKey, cur + 1);
+
+      renderPollResults(type);
+    };
+
+    // 5. Most Loved Characters (Promote / Demote & Live Search)
+    let characters = [
+      { id: 1, name: "Levi Ackerman", anime: "Attack on Titan", pts: 43142, img: "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=120" },
+      { id: 2, name: "Satoru Gojo", anime: "Jujutsu Kaisen", pts: 41742, img: "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=120" },
+      { id: 3, name: "Killua Zoldyck", anime: "Hunter x Hunter", pts: 37784, img: "https://images.unsplash.com/photo-1563089145-599997674d42?w=120" },
+      { id: 4, name: "Monkey D. Luffy", anime: "One Piece", pts: 36412, img: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=120" }
+    ];
+
+    function showFloatAnim(targetEl, text, color) {
+      const fl = document.createElement('span');
+      fl.className = 'floater';
+      fl.innerText = text;
+      fl.style.color = color;
+      targetEl.appendChild(fl);
+      setTimeout(() => fl.remove(), 700);
     }
 
-    // Vote Logic
-    var b1 = document.getElementById('dp-vote-1');
-    var b2 = document.getElementById('dp-vote-2');
-    var msg = document.getElementById('dp-vote-msg');
-    var key = "voted_day_" + dayOfYear;
-    var done = localStorage.getItem(key);
-
-    function lockButtons(name) {
-      b1.disabled = true;
-      b2.disabled = true;
-      b1.style.opacity = '0.5';
-      b2.style.opacity = '0.5';
-      msg.innerHTML = '✅ You voted for <b>' + name + '</b>!';
-    }
-
-    if (done) lockButtons(done);
-
-    b1.onclick = function() {
-      localStorage.setItem(key, today.c1);
-      lockButtons(today.c1);
+    window.voteChar = function(id, delta, btnEl) {
+      vibe(40);
+      const c = characters.find(item => item.id === id);
+      if (!c) return;
+      c.pts += delta;
+      showFloatAnim(btnEl.closest('.char-card'), delta > 0 ? '+1' : '-1', delta > 0 ? '#4ade80' : '#ef4444');
+      characters.sort((a, b) => b.pts - a.pts);
+      window.filterCharacters();
     };
-    b2.onclick = function() {
-      localStorage.setItem(key, today.c2);
-      lockButtons(today.c2);
+
+    window.filterCharacters = function() {
+      const q = document.getElementById('char-search').value.toLowerCase();
+      const matched = characters.filter(c => c.name.toLowerCase().includes(q) || c.anime.toLowerCase().includes(q));
+      const box = document.getElementById('character-list');
+      box.innerHTML = matched.map(c => `
+        <div class="char-card">
+          <img src="${c.img}" class="char-img">
+          <div class="char-info">
+            <div class="char-name">${c.name}</div>
+            <div class="char-anime">${c.anime}</div>
+            <div class="char-pts">★ ${c.pts.toLocaleString()} Points</div>
+          </div>
+          <div class="rank-btns">
+            <button class="rank-btn btn-promote" onclick="voteChar(${c.id}, 1, this)">▲ Promote</button>
+            <button class="rank-btn btn-demote" onclick="voteChar(${c.id}, -1, this)">▼ Demote</button>
+          </div>
+        </div>
+      `).join('');
     };
-  }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initDailyPoll);
-  } else {
-    initDailyPoll();
-  }
-})();
-</script>
+    // 6. Anime Vault with Harem & All Genres
+    const animeList = [
+      { id: 1, title: "Attack on Titan", genres: ["Action", "Supernatural"], score: "9.1", eps: "87", desc: "Humanity fights for survival against man-eating giants behind colossal walls.", img: "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=350" },
+      { id: 2, title: "The Quintessential Quintuplets", genres: ["Harem", "Romance", "Comedy"], score: "8.2", eps: "24", desc: "A poor tutor is hired to guide five identical quintuplet sisters through high school graduation.", img: "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=350" },
+      { id: 3, title: "Demon Slayer", genres: ["Action", "Supernatural"], score: "8.9", eps: "55", desc: "Tanjiro embarks on a perilous quest to avenge his family and cure his demon-turned sister.", img: "https://images.unsplash.com/photo-1563089145-599997674d42?w=350" },
+      { id: 4, title: "High School DxD", genres: ["Harem", "Supernatural", "Action"], score: "7.8", eps: "48", desc: "Issei is reincarnated as a devil servant and finds himself surrounded by powerful demonic girls.", img: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=350" },
+      { id: 5, title: "Nisekoi: False Love", genres: ["Harem", "Romance", "Comedy"], score: "7.9", eps: "32", desc: "Two rival yakuza family heirs must pretend to be in love to prevent an all-out gang war.", img: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=350" },
+      { id: 6, title: "Jujutsu Kaisen", genres: ["Action", "Supernatural"], score: "8.8", eps: "47", desc: "Yuji Itadori swallows a cursed talisman and becomes entangled in the lethal world of sorcery.", img: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=350" }
+    ];
 
+    window.filterGenre = function(genre, el) {
+      vibe(30);
+      document.querySelectorAll('.genre-chip').forEach(c => c.classList.remove('active'));
+      if (el) el.classList.add('active');
 
+      const filtered = genre === 'All' 
+        ? animeList 
+        : animeList.filter(a => a.genres.some(g => g.toLowerCase() === genre.toLowerCase()));
+
+      const grid = document.getElementById('anime-grid');
+      grid.innerHTML = filtered.map(a => `
+        <div class="anime-card" onclick="openModal(${a.id})">
+          <img src="${a.img}" class="anime-poster">
+          <div class="anime-detail">
+            <div class="anime-title">${a.title}</div>
+            <div class="anime-score">★ ${a.score} • ${a.genres[0]}</div>
+          </div>
+        </div>
+      `).join('');
+    };
+
+    window.openModal = function(id) {
+      vibe(40);
+      const a = animeList.find(item => item.id === id);
+      if (!a) return;
+      document.getElementById('m-poster').src = a.img;
+      document.getElementById('m-title').innerText = a.title;
+      document.getElementById('m-meta').innerText = `Rating: ★ ${a.score} | Episodes: ${a.eps} | ${a.genres.join(', ')}`;
+      document.getElementById('m-synopsis').innerText = a.desc;
+      document.getElementById('anime-modal').style.display = 'flex';
+    };
+
+    window.closeModal = function() {
+      document.getElementById('anime-modal').style.display = 'none';
+    };
+
+    window.surpriseAnime = function() {
+      vibe(60);
+      const rand = animeList[Math.floor(Math.random() * animeList.length)];
+      window.openModal(rand.id);
+    };
+
+    // 7. Community Chat Simulation
+    const chatInput = document.getElementById('chat-input');
+    const chatBtn = document.getElementById('chat-send-btn');
+    const chatStream = document.getElementById('chat-stream');
+
+    chatBtn.onclick = function() {
+      const msg = chatInput.value.trim();
+      if (!msg) return;
+      vibe(30);
+      const bubble = document.createElement('div');
+      bubble.className = 'chat-bubble';
+      bubble.style.alignSelf = 'flex-end';
+      bubble.style.background = '#1e3a8a';
+      bubble.innerHTML = `<div class="chat-user" style="color:#93c5fd;">You</div><div class="chat-text">${msg}</div>`;
+      chatStream.appendChild(bubble);
+      chatInput.value = '';
+      chatStream.scrollTop = chatStream.scrollHeight;
+    };
+
+    // Initialize Everything
+    setupPollUI('male', curMale);
+    setupPollUI('female', curFemale);
+    startCountdowns();
+    window.filterCharacters();
+    window.filterGenre('All', document.querySelector('.genre-chip'));
+  })();
+  </script>
+</body>
+</html>
+
+  
