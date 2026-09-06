@@ -685,6 +685,78 @@
             font-size: 11px;
             margin-left: 8px;
             cursor: pointer;
+            .daily-battle-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.battle-fighters {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.fighter-card {
+  flex: 1;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 8px;
+  cursor: pointer;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.fighter-card:active {
+  transform: scale(0.96);
+}
+
+.fighter-img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.fighter-name {
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-top: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fighter-anime {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+}
+
+.vs-badge {
+  font-weight: 900;
+  font-size: 0.85rem;
+  color: var(--accent-red);
+  padding: 6px;
+}
+
+.poll-results-bar {
+  display: flex;
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #222;
+  margin-top: 4px;
+}
+
+.bar-left { background: var(--accent-cyan); height: 100%; }
+.bar-right { background: #ff77a9; height: 100%; }
+            
         }
     </style>
     </head>
@@ -753,6 +825,27 @@
             <span>🔥</span> <span id="label-polls">Most Loved Characters</span>
         </div>
         <input type="text" id="charSearchInput" class="chat-input" style="width:100%; margin-bottom:12px;" placeholder="Search any character (Goku, Naruto, Levi, Luffy...)" oninput="searchCharacters(this.value)">
+            <!-- Daily Battles Container -->
+<div id="dailyPollsWrapper" style="padding: 12px; max-width: 550px; margin: 0 auto;">
+  
+  <!-- Male Category -->
+  <div style="margin-bottom: 24px;">
+    <div style="color: var(--accent-cyan); font-weight: 800; font-size: 0.9rem; margin-bottom: 8px; letter-spacing: 0.5px;">
+      ⚡ WHO IS YOUR FAVOURITE CHARACTER?
+    </div>
+    <div id="malePollBox" class="daily-battle-box"></div>
+  </div>
+
+  <!-- Female Category -->
+  <div style="margin-bottom: 24px;">
+    <div style="color: #ff77a9; font-weight: 800; font-size: 0.9rem; margin-bottom: 8px; letter-spacing: 0.5px;">
+      ✨ WHO IS THE MOST BEAUTIFUL? (BEAUTY SHOWDOWN)
+    </div>
+    <div id="femalePollBox" class="daily-battle-box"></div>
+  </div>
+
+</div>
+            
         <div id="characterList"></div>
         <button id="loadMoreCharsBtn" onclick="loadMoreCharacters()" style="width:100%; padding:10px; background:var(--bg-card); border:1px solid var(--border); color:var(--accent-cyan); border-radius:8px; font-weight:700; cursor:pointer; margin-top:10px;">
             ⬇️ Load More Characters
@@ -1621,6 +1714,129 @@
         return div.innerHTML;
     }
 </script>
+        // 1. Male Matchups List
+const maleBattles = [
+  {
+    id: "m_battle_1",
+    c1: { name: "Satoru Gojo", anime: "Jujutsu Kaisen", img: "https://s4.anilist.co/file/anilistcdn/character/large/b127997-j2S87Xn7g2uG.png" },
+    c2: { name: "Kakashi Hatake", anime: "Naruto", img: "https://s4.anilist.co/file/anilistcdn/character/large/b85-gDq6QYvLwPvh.png" }
+  },
+  {
+    id: "m_battle_2",
+    c1: { name: "Monkey D. Luffy", anime: "One Piece", img: "https://s4.anilist.co/file/anilistcdn/character/large/b40-gN5jU4iYhB8t.png" },
+    c2: { name: "Naruto Uzumaki", anime: "Naruto", img: "https://s4.anilist.co/file/anilistcdn/character/large/b17-8z5W2sEaF7QY.png" }
+  },
+  {
+    id: "m_battle_3",
+    c1: { name: "Levi Ackerman", anime: "Attack on Titan", img: "https://s4.anilist.co/file/anilistcdn/character/large/b45627-5PscfW7WpM3s.png" },
+    c2: { name: "Roronoa Zoro", anime: "One Piece", img: "https://s4.anilist.co/file/anilistcdn/character/large/b62-mP5hI0Tz14eY.png" }
+  },
+  {
+    id: "m_battle_4",
+    c1: { name: "Light Yagami", anime: "Death Note", img: "https://s4.anilist.co/file/anilistcdn/character/large/b80-rJqB6s3uJ1j1.png" },
+    c2: { name: "L Lawliet", anime: "Death Note", img: "https://s4.anilist.co/file/anilistcdn/character/large/b71-1q2s3d4f5g6h.png" }
+  }
+];
+
+// 2. Female Matchups List (Beauty Showdown)
+const femaleBattles = [
+  {
+    id: "f_battle_1",
+    c1: { name: "Yor Forger", anime: "Spy x Family", img: "https://s4.anilist.co/file/anilistcdn/character/large/b163250-JbL35GgJc0B2.png" },
+    c2: { name: "Boa Hancock", anime: "One Piece", img: "https://s4.anilist.co/file/anilistcdn/character/large/b13380-4D5s6a7b8c9d.png" }
+  },
+  {
+    id: "f_battle_2",
+    c1: { name: "Marin Kitagawa", anime: "My Dress-Up Darling", img: "https://s4.anilist.co/file/anilistcdn/character/large/b151608-x9Y8z7a6b5c4.png" },
+    c2: { name: "Mai Sakurajima", anime: "Bunny Girl Senpai", img: "https://s4.anilist.co/file/anilistcdn/character/large/b127532-a1b2c3d4e5f6.png" }
+  },
+  {
+    id: "f_battle_3",
+    c1: { name: "Hinata Hyuga", anime: "Naruto", img: "https://s4.anilist.co/file/anilistcdn/character/large/b1555-8a9b0c1d2e3f.png" },
+    c2: { name: "Mikasa Ackerman", anime: "Attack on Titan", img: "https://s4.anilist.co/file/anilistcdn/character/large/b40881-0f1e2d3c4b5a.png" }
+  }
+];
+
+// 3. Indian Midnight Rotation Index
+function getTodayBattleIndex(arrayLength) {
+  const now = new Date();
+  const istOffset = 5.5 * 60 * 60 * 1000;
+  const ist = new Date(now.getTime() + istOffset);
+  const startOfYear = new Date(ist.getFullYear(), 0, 0);
+  const dayNumber = Math.floor((ist - startOfYear) / (1000 * 60 * 60 * 24));
+  return dayNumber % arrayLength;
+}
+
+// 4. Render Battle Cards
+function renderDailyBattles() {
+  const maleIndex = getTodayBattleIndex(maleBattles.length);
+  const femaleIndex = getTodayBattleIndex(femaleBattles.length);
+
+  buildBattleUI('malePollBox', maleBattles[maleIndex], 'male');
+  buildBattleUI('femalePollBox', femaleBattles[femaleIndex], 'female');
+}
+
+function buildBattleUI(containerId, battle, type) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  const storageKey = `voted_${battle.id}`;
+  const userVote = localStorage.getItem(storageKey);
+
+  let count1 = parseInt(localStorage.getItem(`${battle.id}_c1`) || "48");
+  let count2 = parseInt(localStorage.getItem(`${battle.id}_c2`) || "52");
+  const total = count1 + count2;
+  const pct1 = Math.round((count1 / total) * 100);
+  const pct2 = 100 - pct1;
+
+  container.innerHTML = `
+    <div class="battle-fighters">
+      <div class="fighter-card" onclick="castDailyVote('${battle.id}', 'c1', '${type}')">
+        <img class="fighter-img" src="${battle.c1.img}" alt="${battle.c1.name}">
+        <div class="fighter-name">${battle.c1.name}</div>
+        <div class="fighter-anime">${battle.c1.anime}</div>
+        ${userVote ? `<div style="font-weight:bold; color:var(--accent-cyan); margin-top:4px;">${pct1}%</div>` : ''}
+      </div>
+
+      <div class="vs-badge">VS</div>
+
+      <div class="fighter-card" onclick="castDailyVote('${battle.id}', 'c2', '${type}')">
+        <img class="fighter-img" src="${battle.c2.img}" alt="${battle.c2.name}">
+        <div class="fighter-name">${battle.c2.name}</div>
+        <div class="fighter-anime">${battle.c2.anime}</div>
+        ${userVote ? `<div style="font-weight:bold; color:#ff77a9; margin-top:4px;">${pct2}%</div>` : ''}
+      </div>
+    </div>
+
+    ${userVote ? `
+      <div class="poll-results-bar">
+        <div class="bar-left" style="width: ${pct1}%"></div>
+        <div class="bar-right" style="width: ${pct2}%"></div>
+      </div>
+      <div style="font-size: 0.72rem; text-align: center; color: var(--text-secondary); margin-top: 4px;">
+        ✓ You voted! Resets at 12:00 AM IST.
+      </div>
+    ` : `
+      <div style="font-size: 0.72rem; text-align: center; color: var(--text-secondary); margin-top: 2px;">
+        Tap on your pick to cast vote
+      </div>
+    `}
+  `;
+}
+
+function castDailyVote(battleId, choice, type) {
+  const storageKey = `voted_${battleId}`;
+  if (localStorage.getItem(storageKey)) return;
+
+  const currentCount = parseInt(localStorage.getItem(`${battleId}_${choice}`) || (choice === 'c1' ? "48" : "52"));
+  localStorage.setItem(`${battleId}_${choice}`, currentCount + 1);
+  localStorage.setItem(storageKey, choice);
+
+  renderDailyBattles();
+}
+
+window.addEventListener('DOMContentLoaded', renderDailyBattles);
+        
 </body>
 </html>
 
